@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!--This is the layout for the instruction fragment to be used in the master detail flow layout -->
+
+    <TextView
+        android:id="@+id/instruction_frag_textView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textSize="24sp"
+        android:gravity="center_horizontal"/>
+
+</android.support.constraint.ConstraintLayout>
