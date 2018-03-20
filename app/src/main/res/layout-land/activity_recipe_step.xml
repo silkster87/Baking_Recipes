@@ -7,6 +7,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--When the user rotates their phone in landscape mode, we want the video to be in
+     fullscreen mode-->
+
     <com.devbrackets.android.exomedia.ui.widget.VideoView
         android:id="@+id/video_view_land"
         android:layout_width="fill_parent"
