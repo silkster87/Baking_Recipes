@@ -7,6 +7,10 @@
     android:baselineAligned="false"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--This layout is going to be a 2 pane layout for a tablet in landscape
+     The navigation bar is on the LHS and is going to occupy a third of the screen.
+     The Detailed view is on the RHS and will occupy two thirds of the screen.-->
+
     <android.support.v4.widget.NestedScrollView
         android:id="@+id/navigation_scrollView"
         android:layout_width="0dp"
