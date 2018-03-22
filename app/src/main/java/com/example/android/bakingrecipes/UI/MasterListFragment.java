@@ -1,6 +1,6 @@
 package com.example.android.bakingrecipes.UI;
 
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.bakingrecipes.R;
+import com.example.android.bakingrecipes.RecipeObjects.Recipe;
 import com.example.android.bakingrecipes.RecipeObjects.Step;
 
 /** This master list fragment will display a recycler view of steps for the selected recipe.
@@ -21,8 +22,13 @@ import com.example.android.bakingrecipes.RecipeObjects.Step;
 public class MasterListFragment extends Fragment {
 
     OnStepItemSelectedListener mCallback;
+    private MasterListAdapter mAdapter;
 
     public MasterListFragment(){
+    }
+
+    public void setRecipeData(Recipe mRecipe) {
+        mAdapter.setRecipeData(mRecipe);
     }
 
     public interface OnStepItemSelectedListener {
@@ -51,7 +57,7 @@ public class MasterListFragment extends Fragment {
 
         RecyclerView mRecyclerView = rootView.findViewById(R.id.recipes_recycler_view);
 
-        MasterListAdapter mAdapter = new MasterListAdapter(new MasterListAdapter.OnItemClickListener() {
+         mAdapter = new MasterListAdapter(new MasterListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Step step) {
                     mCallback.onStepItemSelected(step);
