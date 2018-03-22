@@ -11,10 +11,16 @@
      The navigation bar is on the LHS and is going to occupy a third of the screen.
      The Detailed view is on the RHS and will occupy two thirds of the screen.-->
 
-    <android.support.v4.widget.NestedScrollView
-        android:id="@+id/navigation_scrollView"
+    <LinearLayout
+        android:id="@+id/LHS_linear_layout"
         android:layout_width="0dp"
         android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
+
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/navigation_scrollView"
+        android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <RelativeLayout
@@ -34,7 +40,7 @@
                 android:paddingEnd="8dp"/>
 
             <TextView
-                android:id="@+id/servings_title"
+                android:id="@+id/servings_title_land"
                 android:text="@string/servings_label"
                 android:textSize="24sp"
                 android:textStyle="bold"
@@ -48,7 +54,7 @@
 
 
     <TextView
-        android:id="@+id/recipe_ingredients"
+        android:id="@+id/recipe_ingredients_land"
         android:paddingTop="16dp"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
@@ -56,12 +62,14 @@
         android:layout_height="wrap_content"
         android:textSize="24sp" />
 
-    <fragment
-        android:id="@+id/master_list_fragment_of_steps"
+    <FrameLayout
+        android:id="@+id/master_list_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
     </android.support.v4.widget.NestedScrollView>
+
+    </LinearLayout>
 
 
     <!-- A small divider -->
