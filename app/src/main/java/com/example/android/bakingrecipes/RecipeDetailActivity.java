@@ -1,6 +1,7 @@
 package com.example.android.bakingrecipes;
 
 import android.content.Intent;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,6 +11,8 @@ import android.widget.TextView;
 import com.example.android.bakingrecipes.RecipeObjects.Ingredient;
 import com.example.android.bakingrecipes.RecipeObjects.Recipe;
 import com.example.android.bakingrecipes.RecipeObjects.Step;
+import com.example.android.bakingrecipes.UI.MasterListFragment;
+
 import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -19,12 +22,18 @@ for the recipe. The user can click on a specific step for more detail. This will
 recipe step activity.
 * */
 
-public class RecipeDetailActivity extends AppCompatActivity {
+public class RecipeDetailActivity extends AppCompatActivity implements MasterListFragment.OnStepItemSelectedListener{
 
     @BindView(R.id.recipe_ingredients) TextView mRecipeIngredients;
     @BindView(R.id.steps_recyclerView) RecyclerView mStepsRecyclerView;
     @BindView(R.id.servings_title) TextView mServingsTextView;
+
+    //Views in the master detail flow. These are used if in tablet mode landscape
+    @BindView(R.id.servings_title_land) TextView mServingsLandTextView;
+    @BindView(R.id.recipe_ingredients_land) TextView mRecipeIngredientsLandTextView;
+
     private Recipe mRecipe;
+    private Boolean mTwoPane;
 
     public static final String recipeStep = "recipeStep";
     public static final String recipeTitle = "recipeTitle";
@@ -46,6 +55,9 @@ public class RecipeDetailActivity extends AppCompatActivity {
 
         List<Ingredient> mIngredientList = mRecipe.getArrayOfIngredients();
 
+        if(findViewById(R.id.master_list_container) == null){
+            mTwoPane = false; //Not in 2 pane mode - in phone view
+
         mStepsRecyclerView.setHasFixedSize(true);
         mStepsRecyclerView.setNestedScrollingEnabled(false);
         mStepsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -64,7 +76,6 @@ public class RecipeDetailActivity extends AppCompatActivity {
 
         mStepsRecyclerView.setAdapter(mStepsAdapter);
 
-
         StringBuilder builder = new StringBuilder();
 
             for(int i=0; i<mIngredientList.size(); i++){
@@ -82,6 +93,46 @@ public class RecipeDetailActivity extends AppCompatActivity {
 
         String mServings = " " + Integer.toString(mRecipe.getmServings());
         mServingsTextView.append(mServings);
+
+        } else {
+            mTwoPane = true; //We are in 2 pane mode
+            StringBuilder builder = new StringBuilder();
+
+            for(int i=0; i<mIngredientList.size(); i++){
+
+                builder.append(mIngredientList.get(i).getIngredient())
+                        .append(", ")
+                        .append(mIngredientList.get(i).getmQuantity())
+                        .append(" ")
+                        .append((mIngredientList.get(i).getmMeasure()))
+                        .append("\n");
+            }
+
+            String ingredients = builder.toString();
+            mRecipeIngredientsLandTextView.setText(ingredients);
+            String mServingsLand = " " + Integer.toString(mRecipe.getmServings());
+            mServingsLandTextView.append(mServingsLand);
+
+            MasterListFragment stepFragment = new MasterListFragment();
+            stepFragment.setRecipeData(mRecipe);
+
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .add(R.id.master_list_container, stepFragment)
+                    .commit();
+
+            //Set the RHS of the 2 pane mode
+
+
+
+        }
+
     }
 
+    @Override
+    public void onStepItemSelected(Step step) {
+        String videoURL = step.getmVideoURL();
+        String thumbnailURL = step.getmThumbNailURL();
+        String instructionOfStep = step.getmDescription();
+    }
 }
