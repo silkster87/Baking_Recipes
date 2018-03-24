@@ -46,6 +46,7 @@ public class VideoFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        videoView.stopPlayback();
         videoView.release();
     }
 
