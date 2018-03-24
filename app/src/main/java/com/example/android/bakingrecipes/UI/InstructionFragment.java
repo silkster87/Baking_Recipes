@@ -28,11 +28,12 @@ public class InstructionFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
+        View rootView = inflater.inflate(R.layout.instruction_fragment_layout, container, false);
+
         if(savedInstanceState != null){
             instructionText = savedInstanceState.getString(INSTRUCTION_STRING);
         }
 
-        View rootView = inflater.inflate(R.layout.instruction_fragment_layout, container, false);
         final TextView textView = rootView.findViewById(R.id.instruction_frag_textView);
         textView.setText(instructionText);
         return rootView;
