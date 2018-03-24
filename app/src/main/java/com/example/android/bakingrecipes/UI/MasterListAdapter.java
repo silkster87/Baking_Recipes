@@ -9,8 +9,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.android.bakingrecipes.R;
-import com.example.android.bakingrecipes.RecipeObjects.Recipe;
 import com.example.android.bakingrecipes.RecipeObjects.Step;
+
+import java.util.List;
 
 
 /**This Master List Adapter will be used in the horizontal tablet layout. It will be attached
@@ -22,10 +23,11 @@ import com.example.android.bakingrecipes.RecipeObjects.Step;
 
 public class MasterListAdapter extends RecyclerView.Adapter<MasterListAdapter.ViewHolder> {
 
-    private Recipe mRecipe;
     private final OnItemClickListener listener;
+    private List<Step> listOfSteps;
 
-    public MasterListAdapter(OnItemClickListener listener){
+    public MasterListAdapter(List<Step> listOfSteps, OnItemClickListener listener){
+        this.listOfSteps=listOfSteps;
         this.listener=listener;
     }
 
@@ -33,7 +35,7 @@ public class MasterListAdapter extends RecyclerView.Adapter<MasterListAdapter.Vi
     @Override
     public MasterListAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Context context = parent.getContext();
-        int layoutIdForListItem = R.layout.recipe_list_item;
+        int layoutIdForListItem = R.layout.recipe_step_item;
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(layoutIdForListItem, parent, false);
         MasterListAdapter.ViewHolder viewHolder = new MasterListAdapter.ViewHolder(view);
@@ -42,21 +44,17 @@ public class MasterListAdapter extends RecyclerView.Adapter<MasterListAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull MasterListAdapter.ViewHolder holder, int position) {
-        holder.bind(mRecipe.getArrayOfSteps().get(position), listener);
-        holder.mRecipeItemTextView.setText(mRecipe.getArrayOfSteps().get(position).getmShortDesc());
+        holder.bind(listOfSteps.get(position), listener);
+        holder.mRecipeItemTextView.setText(listOfSteps.get(position).getmShortDesc());
 
     }
 
     @Override
     public int getItemCount() {
-        if(mRecipe==null)return 0;
-        return mRecipe.getArrayOfSteps().size();
+        if(listOfSteps==null)return 0;
+        return listOfSteps.size();
     }
 
-    public void setRecipeData(Recipe recipeItem){
-        mRecipe = recipeItem;
-        notifyDataSetChanged();
-    }
 
     public interface OnItemClickListener {
         void onItemClick(Step recipeStep);
