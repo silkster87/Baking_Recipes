@@ -23,6 +23,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <LinearLayout
+            android:id="@+id/linear_layout_in_scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
         <RelativeLayout
             android:id="@+id/ingredients_servings_layout"
             android:layout_width="match_parent"
@@ -67,6 +73,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+        </LinearLayout>
+
     </android.support.v4.widget.NestedScrollView>
 
     </LinearLayout>
@@ -89,15 +97,15 @@
         android:orientation="vertical">
 
         <!--video-->
-        <fragment
+        <FrameLayout
             android:id="@+id/video_land_frag"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="2"
             />
 
         <!--recipe step instruction-->
-        <fragment
+        <FrameLayout
             android:id="@+id/instruction_frag"
             android:layout_width="match_parent"
             android:layout_height="0dp"
