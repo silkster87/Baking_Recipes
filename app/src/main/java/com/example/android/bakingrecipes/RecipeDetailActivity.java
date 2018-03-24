@@ -13,7 +13,6 @@ import com.example.android.bakingrecipes.RecipeObjects.Ingredient;
 import com.example.android.bakingrecipes.RecipeObjects.Recipe;
 import com.example.android.bakingrecipes.RecipeObjects.Step;
 import com.example.android.bakingrecipes.UI.InstructionFragment;
-import com.example.android.bakingrecipes.UI.MasterListAdapter;
 import com.example.android.bakingrecipes.UI.MasterListFragment;
 import com.example.android.bakingrecipes.UI.VideoFragment;
 
@@ -42,8 +41,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
     public static final String recipeStep = "recipeStep";
     public static final String recipeTitle = "recipeTitle";
     public static final String positionStepClicked = "positionStepClicked";
-    public static final String STEP_ITEM_VIDEO = "step_item_video";
-    public static final String STEP_ITEM_INSTRUCTION = "step_item_instruction";
+    private int stepNumber;
+    public static final String STEP_NUMBER = "STEP_NUMBER";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,9 +52,13 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
         ActionBar ab = getSupportActionBar();
 
-        ab.setDisplayHomeAsUpEnabled(true);
+        if(ab!=null) ab.setDisplayHomeAsUpEnabled(true);
 
         mRecipe = getIntent().getParcelableExtra(MainActivity.recipeBundle);
+
+        if(savedInstanceState!=null){
+            stepNumber = savedInstanceState.getInt(STEP_NUMBER);
+        }
 
         setTitle(mRecipe.getRecipeName());
 
@@ -148,27 +151,34 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
                 } else {
                     videoFragment.setUpVideo(thumbNailURL);
                 }
-
+                FragmentManager videoFragmentManager = getSupportFragmentManager();
+                videoFragmentManager.beginTransaction()
+                        .add(R.id.video_land_frag, videoFragment).commit();
             } else{
-                String videoURL = savedInstanceState.getString(STEP_ITEM_VIDEO);
+                String videoURL = mRecipe.getArrayOfSteps().get(stepNumber).getmVideoURL();
                 videoFragment.setUpVideo(videoURL);
+                FragmentManager videoFragmentManager = getSupportFragmentManager();
+                videoFragmentManager.beginTransaction()
+                        .replace(R.id.video_land_frag, videoFragment).addToBackStack(null).commit();
             }
 
-            InstructionFragment instructionFragment = new InstructionFragment();
+
             //If initially no step is selected go to the first instruction
             if(savedInstanceState == null){
+                InstructionFragment instructionFragment = new InstructionFragment();
                 String instructionForStep = mRecipe.getArrayOfSteps().get(0).getmDescription();
                 instructionFragment.setInstructionText(instructionForStep);
+                FragmentManager fragmentManager1 = getSupportFragmentManager();
+                fragmentManager1.beginTransaction()
+                        .add(R.id.instruction_frag, instructionFragment).commit();
             } else {
-                String instructionForStep = savedInstanceState.getString(STEP_ITEM_INSTRUCTION);
+                String instructionForStep = mRecipe.getArrayOfSteps().get(stepNumber).getmDescription();
+                InstructionFragment instructionFragment = new InstructionFragment();
                 instructionFragment.setInstructionText(instructionForStep);
+                FragmentManager fragmentManager2 = getSupportFragmentManager();
+                fragmentManager2.beginTransaction()
+                        .replace(R.id.instruction_frag, instructionFragment).addToBackStack(null).commit();
             }
-
-            FragmentManager fragmentManager1 = getSupportFragmentManager();
-            fragmentManager1.beginTransaction()
-                    .add(R.id.video_land_frag, videoFragment)
-                    .add(R.id.instruction_frag, instructionFragment).commit();
-
         }
 
     }
@@ -177,9 +187,11 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
     public void onStepItemSelected(Step step) {
         //When user clicks on a step, we want the video and instruction fragments to update according
         //to the step. Make new fragments and replace them.
+        stepNumber = mRecipe.getArrayOfSteps().indexOf(step);
         String videoURL = step.getmVideoURL();
         String thumbnailURL = step.getmThumbNailURL();
         String instructionOfStep = step.getmDescription();
+
 
         VideoFragment videoFragment = new VideoFragment();
         InstructionFragment instructionFragment = new InstructionFragment();
@@ -195,6 +207,12 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         FragmentManager fragManager = getSupportFragmentManager();
         fragManager.beginTransaction()
                 .replace(R.id.video_land_frag, videoFragment)
-                .replace(R.id.instruction_frag, instructionFragment).commit();
+                .replace(R.id.instruction_frag, instructionFragment).addToBackStack(null).commit();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(STEP_NUMBER, stepNumber);
     }
 }
