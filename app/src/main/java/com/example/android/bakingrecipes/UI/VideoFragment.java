@@ -1,6 +1,6 @@
 package com.example.android.bakingrecipes.UI;
 
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
