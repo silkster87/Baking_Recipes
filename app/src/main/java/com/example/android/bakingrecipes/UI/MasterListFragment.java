@@ -4,6 +4,7 @@ import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,8 @@ import android.view.ViewGroup;
 import com.example.android.bakingrecipes.R;
 import com.example.android.bakingrecipes.RecipeObjects.Recipe;
 import com.example.android.bakingrecipes.RecipeObjects.Step;
+
+import java.util.List;
 
 /** This master list fragment will display a recycler view of steps for the selected recipe.
  * Each step will have a click listener that will update the RHS of the 2 pane UI to show the
@@ -22,13 +25,15 @@ import com.example.android.bakingrecipes.RecipeObjects.Step;
 public class MasterListFragment extends Fragment {
 
     OnStepItemSelectedListener mCallback;
-    private MasterListAdapter mAdapter;
+    private List<Step> listOfSteps;
+
 
     public MasterListFragment(){
     }
 
-    public void setRecipeData(Recipe mRecipe) {
-        mAdapter.setRecipeData(mRecipe);
+
+    public void setListOfSteps(List<Step> listOfSteps){
+        this.listOfSteps=listOfSteps;
     }
 
     public interface OnStepItemSelectedListener {
@@ -56,15 +61,19 @@ public class MasterListFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.fragment_master_list, container, false);
 
         RecyclerView mRecyclerView = rootView.findViewById(R.id.recipes_recycler_view);
-
-         mAdapter = new MasterListAdapter(new MasterListAdapter.OnItemClickListener() {
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setFocusable(false);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        MasterListAdapter mAdapter = new MasterListAdapter(listOfSteps, new MasterListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Step step) {
-                    mCallback.onStepItemSelected(step);
+                mCallback.onStepItemSelected(step);
             }
         });
 
         mRecyclerView.setAdapter(mAdapter);
         return rootView;
     }
+
 }
