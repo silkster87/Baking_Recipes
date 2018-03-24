@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import com.example.android.bakingrecipes.RecipeObjects.Ingredient;
 import com.example.android.bakingrecipes.RecipeObjects.Recipe;
@@ -36,13 +38,14 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
     @Nullable @BindView(R.id.recipe_ingredients_land) TextView mRecipeIngredientsLandTextView;
 
     private Recipe mRecipe;
-    private Boolean mTwoPane;
 
     public static final String recipeStep = "recipeStep";
     public static final String recipeTitle = "recipeTitle";
     public static final String positionStepClicked = "positionStepClicked";
     private int stepNumber;
     public static final String STEP_NUMBER = "STEP_NUMBER";
+    private VideoFragment initialVideoFragment;
+    private VideoFragment newVideoFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +68,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         List<Ingredient> mIngredientList = mRecipe.getArrayOfIngredients();
 
         if(findViewById(R.id.master_list_container) == null){
-            mTwoPane = false; //Not in 2 pane mode - in phone view
+            //Not in 2 pane mode - in phone view
 
         mStepsRecyclerView.setHasFixedSize(true);
         mStepsRecyclerView.setNestedScrollingEnabled(false);
@@ -104,7 +107,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         mServingsTextView.append(mServings);
 
         } else {
-            mTwoPane = true; //We are in 2 pane mode
+           //We are in 2 pane mode
 
             //On the LHS pane, we want the scroll view to start at the top
             findViewById(R.id.linear_layout_in_scroll_view).requestFocus();
@@ -138,46 +141,64 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
             //Set the RHS of the 2 pane mode
 
-            VideoFragment videoFragment = new VideoFragment();
+            InstructionFragment instructionFragment = new InstructionFragment();
+            initialVideoFragment = new VideoFragment();
             //If initially no step is selected go to first step
 
             if(savedInstanceState == null) {
 
                 String videoURL = mRecipe.getArrayOfSteps().get(0).getmVideoURL();
                 String thumbNailURL = mRecipe.getArrayOfSteps().get(0).getmThumbNailURL();
-
-                if (thumbNailURL.equals("")) {
-                    videoFragment.setUpVideo(videoURL);
-                } else {
-                    videoFragment.setUpVideo(thumbNailURL);
-                }
-                FragmentManager videoFragmentManager = getSupportFragmentManager();
-                videoFragmentManager.beginTransaction()
-                        .add(R.id.video_land_frag, videoFragment).commit();
-            } else{
-                String videoURL = mRecipe.getArrayOfSteps().get(stepNumber).getmVideoURL();
-                videoFragment.setUpVideo(videoURL);
-                FragmentManager videoFragmentManager = getSupportFragmentManager();
-                videoFragmentManager.beginTransaction()
-                        .replace(R.id.video_land_frag, videoFragment).addToBackStack(null).commit();
-            }
-
-
-            //If initially no step is selected go to the first instruction
-            if(savedInstanceState == null){
-                InstructionFragment instructionFragment = new InstructionFragment();
                 String instructionForStep = mRecipe.getArrayOfSteps().get(0).getmDescription();
+
                 instructionFragment.setInstructionText(instructionForStep);
+
+                //sometimes there is no videoURL or thumbnailURL
+                if (thumbNailURL.equals("")) {
+                    initialVideoFragment.setUpVideo(videoURL);
+                } else if(videoURL.equals("")){
+                    initialVideoFragment.setUpVideo(thumbNailURL);
+                }
+
                 FragmentManager fragmentManager1 = getSupportFragmentManager();
                 fragmentManager1.beginTransaction()
-                        .add(R.id.instruction_frag, instructionFragment).commit();
-            } else {
+                        .add(R.id.video_land_frag, initialVideoFragment)
+                        .add(R.id.instruction_frag, instructionFragment).addToBackStack(null)
+                        .commit();
+            } else{
+                //SavedInstance state is not null and we need to replace existing fragments.
+                String videoURL = mRecipe.getArrayOfSteps().get(stepNumber).getmVideoURL();
+                String thumbnailURL = mRecipe.getArrayOfSteps().get(stepNumber).getmThumbNailURL();
                 String instructionForStep = mRecipe.getArrayOfSteps().get(stepNumber).getmDescription();
-                InstructionFragment instructionFragment = new InstructionFragment();
+
                 instructionFragment.setInstructionText(instructionForStep);
-                FragmentManager fragmentManager2 = getSupportFragmentManager();
-                fragmentManager2.beginTransaction()
-                        .replace(R.id.instruction_frag, instructionFragment).addToBackStack(null).commit();
+
+                FrameLayout frameLayout = findViewById(R.id.video_land_frag);
+
+                if(thumbnailURL.equals("") && videoURL.equals("")){
+                    //There is no video content to show
+                    frameLayout.setVisibility(View.GONE);
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.instruction_frag, instructionFragment)
+                            .addToBackStack(null)
+                            .commit();
+                }else {
+                    if (thumbnailURL.equals("")) {
+                        frameLayout.setVisibility(View.VISIBLE);
+                        initialVideoFragment.setUpVideo(videoURL);
+                        FragmentManager fragManager = getSupportFragmentManager();
+                        fragManager.beginTransaction()
+                                .replace(R.id.video_land_frag, initialVideoFragment)
+                                .replace(R.id.instruction_frag, instructionFragment).addToBackStack(null).commit();
+                    } else if (videoURL.equals("")) {
+                        frameLayout.setVisibility(View.VISIBLE);
+                        initialVideoFragment.setUpVideo(thumbnailURL);
+                        FragmentManager fragManager = getSupportFragmentManager();
+                        fragManager.beginTransaction()
+                                .replace(R.id.video_land_frag, initialVideoFragment)
+                                .replace(R.id.instruction_frag, instructionFragment).addToBackStack(null).commit();
+                    }
+                }
             }
         }
 
@@ -192,22 +213,50 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         String thumbnailURL = step.getmThumbNailURL();
         String instructionOfStep = step.getmDescription();
 
-
-        VideoFragment videoFragment = new VideoFragment();
-        InstructionFragment instructionFragment = new InstructionFragment();
-
-        if(thumbnailURL.equals("")){
-            videoFragment.setUpVideo(videoURL);
-        }else{
-            videoFragment.setUpVideo(thumbnailURL);
+        if(newVideoFragment==null){
+            FragmentManager removeVideoFragMan = getSupportFragmentManager();
+            removeVideoFragMan.beginTransaction()
+                    .remove(initialVideoFragment)
+                    .addToBackStack(null).commit();
+        } else {
+            FragmentManager removeVideoFragMan = getSupportFragmentManager();
+            removeVideoFragMan.beginTransaction()
+                    .remove(newVideoFragment)
+                    .addToBackStack(null).commit();
         }
 
+
+
+        InstructionFragment instructionFragment = new InstructionFragment();
         instructionFragment.setInstructionText(instructionOfStep);
 
-        FragmentManager fragManager = getSupportFragmentManager();
-        fragManager.beginTransaction()
-                .replace(R.id.video_land_frag, videoFragment)
-                .replace(R.id.instruction_frag, instructionFragment).addToBackStack(null).commit();
+
+        FrameLayout frameLayout = findViewById(R.id.video_land_frag);
+        if(thumbnailURL.equals("") && videoURL.equals("")){
+            //There is no video content to show
+            frameLayout.setVisibility(View.GONE);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.instruction_frag, instructionFragment).addToBackStack(null).commit();
+        }else {
+            if (thumbnailURL.equals("")) {
+                frameLayout.setVisibility(View.VISIBLE);
+                newVideoFragment = new VideoFragment();
+                newVideoFragment.setUpVideo(videoURL);
+                FragmentManager fragManager = getSupportFragmentManager();
+                fragManager.beginTransaction()
+                        .replace(R.id.video_land_frag, newVideoFragment)
+                        .replace(R.id.instruction_frag, instructionFragment).addToBackStack(null).commit();
+            } else if (videoURL.equals("")) {
+                frameLayout.setVisibility(View.VISIBLE);
+                newVideoFragment = new VideoFragment();
+                newVideoFragment.setUpVideo(thumbnailURL);
+                FragmentManager fragManager = getSupportFragmentManager();
+                fragManager.beginTransaction()
+                        .replace(R.id.video_land_frag, newVideoFragment)
+                        .replace(R.id.instruction_frag, instructionFragment).addToBackStack(null).commit();
+            }
+        }
     }
 
     @Override
