@@ -88,7 +88,7 @@ public class MasterListAdapter extends RecyclerView.Adapter<MasterListAdapter.Vi
                 }
             });
             if(row_index==position){
-                mLinearLayout.setBackgroundColor(Color.parseColor("#b2ebf2"));
+                mLinearLayout.setBackgroundColor(Color.parseColor("#9FA8DA"));
             }
             else {
                 mLinearLayout.setBackgroundColor(Color.parseColor("#ffffff"));
