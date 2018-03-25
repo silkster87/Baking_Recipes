@@ -164,7 +164,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
                 FragmentManager fragmentManager1 = getSupportFragmentManager();
                 fragmentManager1.beginTransaction()
                         .add(R.id.video_land_frag, videoFragment)
-                        .add(R.id.instruction_frag, instructionFragment).addToBackStack(null)
+                        .add(R.id.instruction_frag, instructionFragment)
                         .commit();
             } else{
                 //SavedInstance state is not null and we need to replace existing fragments.
