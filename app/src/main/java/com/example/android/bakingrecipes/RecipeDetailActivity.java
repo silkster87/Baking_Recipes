@@ -42,9 +42,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
     public static final String positionStepClicked = "positionStepClicked";
     private int stepNumber;
     public static final String STEP_NUMBER = "STEP_NUMBER";
-   // private VideoFragment initialVideoFragment;
     private InstructionFragment instructionFragment;
-   // private VideoFragment newVideoFragment;
     private VideoFragment videoFragment;
 
     @Override
@@ -132,11 +130,12 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
             List<Step> listOfSteps = mRecipe.getArrayOfSteps();
             MasterListFragment stepFragment = new MasterListFragment();
+            stepFragment.setStepToBeHighlighted(stepNumber);
             stepFragment.setListOfSteps(listOfSteps);
 
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
-                    .add(R.id.master_list_container, stepFragment).addToBackStack(null)
+                    .add(R.id.master_list_container, stepFragment)
                     .commit();
 
             //Set the RHS of the 2 pane mode
@@ -170,6 +169,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
             } else{
                 //SavedInstance state is not null and we need to replace existing fragments.
                 //If screen is rotated it will use this else block.
+
 
                 String videoURL = mRecipe.getArrayOfSteps().get(stepNumber).getmVideoURL();
                 String thumbnailURL = mRecipe.getArrayOfSteps().get(stepNumber).getmThumbNailURL();
@@ -209,9 +209,9 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         //to the step. Make new fragments and replace them.
 
         int newStepNumber = mRecipe.getArrayOfSteps().indexOf(step);
+
         //If user clicks on an step that is already showing then it is unnecessary to make changes
         if(newStepNumber != stepNumber) {
-
             stepNumber = newStepNumber;
             String videoURL = step.getmVideoURL();
             String thumbnailURL = step.getmThumbNailURL();
