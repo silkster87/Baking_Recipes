@@ -24,7 +24,7 @@
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:text="Hello World!"
-            android:textSize="36sp"
+            android:textSize="30sp"
             tools:layout_editor_absoluteX="99dp"
             tools:layout_editor_absoluteY="0dp" />
 
