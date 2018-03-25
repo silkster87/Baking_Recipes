@@ -33,17 +33,6 @@
             android:id="@+id/ingredients_servings_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <TextView
-                android:id="@+id/ingredients_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ingredients_label"
-                android:layout_alignParentStart="true"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:paddingTop="8dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"/>
 
             <TextView
                 android:id="@+id/servings_title_land"
@@ -51,8 +40,8 @@
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:paddingTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:layout_alignParentEnd="true"
+                android:layout_marginStart="16dp"
+                android:layout_alignParentStart="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
