@@ -8,8 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 import com.example.android.bakingrecipes.RecipeObjects.Ingredient;
 import com.example.android.bakingrecipes.RecipeObjects.Recipe;
@@ -44,8 +42,10 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
     public static final String positionStepClicked = "positionStepClicked";
     private int stepNumber;
     public static final String STEP_NUMBER = "STEP_NUMBER";
-    private VideoFragment initialVideoFragment;
-    private VideoFragment newVideoFragment;
+   // private VideoFragment initialVideoFragment;
+    private InstructionFragment instructionFragment;
+   // private VideoFragment newVideoFragment;
+    private VideoFragment videoFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,68 +136,67 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
-                    .add(R.id.master_list_container, stepFragment)
+                    .add(R.id.master_list_container, stepFragment).addToBackStack(null)
                     .commit();
 
             //Set the RHS of the 2 pane mode
+            //If activity is recreated then the fragments are destroyed. So will need to make new
+            //instruction and video fragments.
 
-            InstructionFragment instructionFragment = new InstructionFragment();
-            initialVideoFragment = new VideoFragment();
-            //If initially no step is selected go to first step
+            instructionFragment = new InstructionFragment();
+            videoFragment = new VideoFragment();
 
             if(savedInstanceState == null) {
+                //If we are going into recipe detail activity for first time set it to first step
 
                 String videoURL = mRecipe.getArrayOfSteps().get(0).getmVideoURL();
                 String thumbNailURL = mRecipe.getArrayOfSteps().get(0).getmThumbNailURL();
                 String instructionForStep = mRecipe.getArrayOfSteps().get(0).getmDescription();
+                stepNumber = 0;
 
                 instructionFragment.setInstructionText(instructionForStep);
 
                 //sometimes there is no videoURL or thumbnailURL
                 if (thumbNailURL.equals("")) {
-                    initialVideoFragment.setUpVideo(videoURL);
+                    videoFragment.setUpVideo(videoURL);
                 } else if(videoURL.equals("")){
-                    initialVideoFragment.setUpVideo(thumbNailURL);
+                    videoFragment.setUpVideo(thumbNailURL);
                 }
-
                 FragmentManager fragmentManager1 = getSupportFragmentManager();
                 fragmentManager1.beginTransaction()
-                        .add(R.id.video_land_frag, initialVideoFragment)
+                        .add(R.id.video_land_frag, videoFragment)
                         .add(R.id.instruction_frag, instructionFragment).addToBackStack(null)
                         .commit();
             } else{
                 //SavedInstance state is not null and we need to replace existing fragments.
+                //If screen is rotated it will use this else block.
+
                 String videoURL = mRecipe.getArrayOfSteps().get(stepNumber).getmVideoURL();
                 String thumbnailURL = mRecipe.getArrayOfSteps().get(stepNumber).getmThumbNailURL();
                 String instructionForStep = mRecipe.getArrayOfSteps().get(stepNumber).getmDescription();
 
                 instructionFragment.setInstructionText(instructionForStep);
 
-                FrameLayout frameLayout = findViewById(R.id.video_land_frag);
-
                 if(thumbnailURL.equals("") && videoURL.equals("")){
                     //There is no video content to show
-                    frameLayout.setVisibility(View.GONE);
-                    fragmentManager.beginTransaction()
+                        FragmentManager fragmentManagerNoURL = getSupportFragmentManager();
+                        fragmentManagerNoURL.beginTransaction()
+                                .replace(R.id.instruction_frag, instructionFragment)
+                                .remove(videoFragment)
+                                .addToBackStack(null)
+                                .commit();
+                }else { //setting up the video URL
+                    if (thumbnailURL.equals("")) {
+                        videoFragment.setUpVideo(videoURL);
+                    } else if (videoURL.equals("")) {
+                        videoFragment.setUpVideo(thumbnailURL);
+                    }
+                    FragmentManager fragManager = getSupportFragmentManager();
+                    fragManager.beginTransaction()
+                            .replace(R.id.video_land_frag, videoFragment)
                             .replace(R.id.instruction_frag, instructionFragment)
                             .addToBackStack(null)
                             .commit();
-                }else {
-                    if (thumbnailURL.equals("")) {
-                        frameLayout.setVisibility(View.VISIBLE);
-                        initialVideoFragment.setUpVideo(videoURL);
-                        FragmentManager fragManager = getSupportFragmentManager();
-                        fragManager.beginTransaction()
-                                .replace(R.id.video_land_frag, initialVideoFragment)
-                                .replace(R.id.instruction_frag, instructionFragment).addToBackStack(null).commit();
-                    } else if (videoURL.equals("")) {
-                        frameLayout.setVisibility(View.VISIBLE);
-                        initialVideoFragment.setUpVideo(thumbnailURL);
-                        FragmentManager fragManager = getSupportFragmentManager();
-                        fragManager.beginTransaction()
-                                .replace(R.id.video_land_frag, initialVideoFragment)
-                                .replace(R.id.instruction_frag, instructionFragment).addToBackStack(null).commit();
-                    }
                 }
             }
         }
@@ -208,53 +207,40 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
     public void onStepItemSelected(Step step) {
         //When user clicks on a step, we want the video and instruction fragments to update according
         //to the step. Make new fragments and replace them.
-        stepNumber = mRecipe.getArrayOfSteps().indexOf(step);
-        String videoURL = step.getmVideoURL();
-        String thumbnailURL = step.getmThumbNailURL();
-        String instructionOfStep = step.getmDescription();
 
-        if(newVideoFragment==null){
-            FragmentManager removeVideoFragMan = getSupportFragmentManager();
-            removeVideoFragMan.beginTransaction()
-                    .remove(initialVideoFragment)
-                    .addToBackStack(null).commit();
-        } else {
-            FragmentManager removeVideoFragMan = getSupportFragmentManager();
-            removeVideoFragMan.beginTransaction()
-                    .remove(newVideoFragment)
-                    .addToBackStack(null).commit();
-        }
+        int newStepNumber = mRecipe.getArrayOfSteps().indexOf(step);
+        //If user clicks on an step that is already showing then it is unnecessary to make changes
+        if(newStepNumber != stepNumber) {
 
+            stepNumber = newStepNumber;
+            String videoURL = step.getmVideoURL();
+            String thumbnailURL = step.getmThumbNailURL();
+            String instructionOfStep = step.getmDescription();
 
+            instructionFragment = new InstructionFragment();
+            instructionFragment.setInstructionText(instructionOfStep);
 
-        InstructionFragment instructionFragment = new InstructionFragment();
-        instructionFragment.setInstructionText(instructionOfStep);
-
-
-        FrameLayout frameLayout = findViewById(R.id.video_land_frag);
-        if(thumbnailURL.equals("") && videoURL.equals("")){
-            //There is no video content to show
-            frameLayout.setVisibility(View.GONE);
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.instruction_frag, instructionFragment).addToBackStack(null).commit();
-        }else {
-            if (thumbnailURL.equals("")) {
-                frameLayout.setVisibility(View.VISIBLE);
-                newVideoFragment = new VideoFragment();
-                newVideoFragment.setUpVideo(videoURL);
-                FragmentManager fragManager = getSupportFragmentManager();
-                fragManager.beginTransaction()
-                        .replace(R.id.video_land_frag, newVideoFragment)
-                        .replace(R.id.instruction_frag, instructionFragment).addToBackStack(null).commit();
-            } else if (videoURL.equals("")) {
-                frameLayout.setVisibility(View.VISIBLE);
-                newVideoFragment = new VideoFragment();
-                newVideoFragment.setUpVideo(thumbnailURL);
-                FragmentManager fragManager = getSupportFragmentManager();
-                fragManager.beginTransaction()
-                        .replace(R.id.video_land_frag, newVideoFragment)
-                        .replace(R.id.instruction_frag, instructionFragment).addToBackStack(null).commit();
+            if (thumbnailURL.equals("") && videoURL.equals("")) {
+                //There is no video content to show
+                FragmentManager fragmentManagerNoURL = getSupportFragmentManager();
+                fragmentManagerNoURL.beginTransaction()
+                        .remove(videoFragment)
+                        .replace(R.id.instruction_frag, instructionFragment)
+                        .addToBackStack(null)
+                        .commit();
+            } else {
+                videoFragment = new VideoFragment();
+                if (thumbnailURL.equals("")) {
+                    videoFragment.setUpVideo(videoURL);
+                } else if (videoURL.equals("")) {
+                    videoFragment.setUpVideo(thumbnailURL);
+                }
+                FragmentManager fragManagerWithURL = getSupportFragmentManager();
+                fragManagerWithURL.beginTransaction()
+                        .replace(R.id.video_land_frag, videoFragment)
+                        .replace(R.id.instruction_frag, instructionFragment)
+                        .addToBackStack(null)
+                        .commit();
             }
         }
     }
@@ -264,4 +250,16 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         super.onSaveInstanceState(outState);
         outState.putInt(STEP_NUMBER, stepNumber);
     }
+
+
+    @Override
+    public void onBackPressed() {
+        int count = getFragmentManager().getBackStackEntryCount();
+        if(count==0){
+            super.onBackPressed();
+        } else {
+            getFragmentManager().popBackStack();
+        }
+    }
+
 }
