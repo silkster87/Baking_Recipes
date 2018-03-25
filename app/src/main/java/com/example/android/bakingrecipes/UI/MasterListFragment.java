@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.bakingrecipes.R;
-import com.example.android.bakingrecipes.RecipeObjects.Recipe;
 import com.example.android.bakingrecipes.RecipeObjects.Step;
 
 import java.util.List;
@@ -26,6 +25,7 @@ public class MasterListFragment extends Fragment {
 
     OnStepItemSelectedListener mCallback;
     private List<Step> listOfSteps;
+    private int stepNumber;
 
 
     public MasterListFragment(){
@@ -34,6 +34,10 @@ public class MasterListFragment extends Fragment {
 
     public void setListOfSteps(List<Step> listOfSteps){
         this.listOfSteps=listOfSteps;
+    }
+
+    public void setStepToBeHighlighted(int stepNumber) {
+        this.stepNumber=stepNumber;
     }
 
     public interface OnStepItemSelectedListener {
@@ -65,7 +69,7 @@ public class MasterListFragment extends Fragment {
         mRecyclerView.setFocusable(false);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
-        MasterListAdapter mAdapter = new MasterListAdapter(listOfSteps, new MasterListAdapter.OnItemClickListener() {
+        MasterListAdapter mAdapter = new MasterListAdapter(listOfSteps,stepNumber, new MasterListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Step step) {
                 mCallback.onStepItemSelected(step);
