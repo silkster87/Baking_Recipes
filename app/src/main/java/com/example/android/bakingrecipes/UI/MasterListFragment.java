@@ -25,7 +25,7 @@ public class MasterListFragment extends Fragment {
 
     OnStepItemSelectedListener mCallback;
     private List<Step> listOfSteps;
-    private int stepNumber;
+    private MasterListAdapter mAdapter;
 
 
     public MasterListFragment(){
@@ -37,7 +37,8 @@ public class MasterListFragment extends Fragment {
     }
 
     public void setStepToBeHighlighted(int stepNumber) {
-        this.stepNumber=stepNumber;
+        mAdapter.setStepToHighlight(stepNumber);
+        notifyAll();
     }
 
     public interface OnStepItemSelectedListener {
@@ -69,7 +70,7 @@ public class MasterListFragment extends Fragment {
         mRecyclerView.setFocusable(false);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
-        MasterListAdapter mAdapter = new MasterListAdapter(listOfSteps,stepNumber, new MasterListAdapter.OnItemClickListener() {
+        mAdapter = new MasterListAdapter(listOfSteps, new MasterListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Step step) {
                 mCallback.onStepItemSelected(step);

@@ -16,6 +16,7 @@ import com.example.android.bakingrecipes.UI.InstructionFragment;
 import com.example.android.bakingrecipes.UI.MasterListFragment;
 import com.example.android.bakingrecipes.UI.VideoFragment;
 
+import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -44,6 +45,9 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
     public static final String STEP_NUMBER = "STEP_NUMBER";
     private InstructionFragment instructionFragment;
     private VideoFragment videoFragment;
+    private ArrayList<Integer> historyOfSteps;
+    private static final String HISTORY_OF_STEPS = "HISTORY_OF_STEPS";
+    private MasterListFragment stepFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,8 +61,11 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
         mRecipe = getIntent().getParcelableExtra(MainActivity.recipeBundle);
 
+        historyOfSteps = new ArrayList<>();
+
         if(savedInstanceState!=null){
             stepNumber = savedInstanceState.getInt(STEP_NUMBER);
+            historyOfSteps = savedInstanceState.getIntegerArrayList(HISTORY_OF_STEPS);
         }
 
         setTitle(mRecipe.getRecipeName());
@@ -129,8 +136,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
             mServingsLandTextView.append(mServingsLand);
 
             List<Step> listOfSteps = mRecipe.getArrayOfSteps();
-            MasterListFragment stepFragment = new MasterListFragment();
-            stepFragment.setStepToBeHighlighted(stepNumber);
+            stepFragment = new MasterListFragment();
+           // stepFragment.setStepToBeHighlighted(stepNumber);
             stepFragment.setListOfSteps(listOfSteps);
 
             FragmentManager fragmentManager = getSupportFragmentManager();
@@ -152,6 +159,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
                 String thumbNailURL = mRecipe.getArrayOfSteps().get(0).getmThumbNailURL();
                 String instructionForStep = mRecipe.getArrayOfSteps().get(0).getmDescription();
                 stepNumber = 0;
+                historyOfSteps.add(stepNumber);
 
                 instructionFragment.setInstructionText(instructionForStep);
 
@@ -170,11 +178,10 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
                 //SavedInstance state is not null and we need to replace existing fragments.
                 //If screen is rotated it will use this else block.
 
-
                 String videoURL = mRecipe.getArrayOfSteps().get(stepNumber).getmVideoURL();
                 String thumbnailURL = mRecipe.getArrayOfSteps().get(stepNumber).getmThumbNailURL();
                 String instructionForStep = mRecipe.getArrayOfSteps().get(stepNumber).getmDescription();
-
+                historyOfSteps.add(stepNumber);
                 instructionFragment.setInstructionText(instructionForStep);
 
                 if(thumbnailURL.equals("") && videoURL.equals("")){
@@ -212,6 +219,9 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
         //If user clicks on an step that is already showing then it is unnecessary to make changes
         if(newStepNumber != stepNumber) {
+            
+            historyOfSteps.add(newStepNumber);
+            
             stepNumber = newStepNumber;
             String videoURL = step.getmVideoURL();
             String thumbnailURL = step.getmThumbNailURL();
@@ -249,6 +259,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(STEP_NUMBER, stepNumber);
+        outState.putIntegerArrayList(HISTORY_OF_STEPS, historyOfSteps);
     }
 
 
@@ -258,6 +269,9 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         if(count==0){
             super.onBackPressed();
         } else {
+            historyOfSteps.remove(historyOfSteps.size()-1);
+            stepNumber = historyOfSteps.get(historyOfSteps.size()-1);
+            stepFragment.setStepToBeHighlighted(stepNumber);
             getFragmentManager().popBackStack();
         }
     }

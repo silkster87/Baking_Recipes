@@ -29,10 +29,9 @@ public class MasterListAdapter extends RecyclerView.Adapter<MasterListAdapter.Vi
     private List<Step> listOfSteps;
     private int row_index = 0;
 
-    public MasterListAdapter(List<Step> listOfSteps, int stepNumber, OnItemClickListener listener){
+    public MasterListAdapter(List<Step> listOfSteps, OnItemClickListener listener){
         this.listOfSteps=listOfSteps;
         this.listener=listener;
-        this.row_index=stepNumber;
     }
 
     @NonNull
@@ -60,6 +59,11 @@ public class MasterListAdapter extends RecyclerView.Adapter<MasterListAdapter.Vi
     public int getItemCount() {
         if(listOfSteps==null)return 0;
         return listOfSteps.size();
+    }
+
+    public void setStepToHighlight(int stepNumber) {
+        this.row_index=stepNumber;
+        notifyDataSetChanged();
     }
 
     public interface OnItemClickListener {
