@@ -22,6 +22,7 @@ public class VideoFragment extends Fragment {
     private com.devbrackets.android.exomedia.ui.widget.VideoView videoView;
     public static final String VIDEO_URL = "video_url";
 
+
     public VideoFragment(){}
 
     @Nullable
@@ -46,8 +47,9 @@ public class VideoFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        videoView.stopPlayback();
-        videoView.release();
+            videoView.stopPlayback();
+            videoView.release();
+
     }
 
     @Override
