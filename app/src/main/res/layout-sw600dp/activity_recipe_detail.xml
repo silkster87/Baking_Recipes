@@ -14,57 +14,68 @@
     <LinearLayout
         android:id="@+id/LHS_linear_layout"
         android:layout_width="0dp"
+        android:layout_height="match_parent"
         android:layout_weight="1"
-        android:orientation="vertical"
-        android:layout_height="match_parent">
+        android:orientation="vertical">
 
-    <android.support.v4.widget.NestedScrollView
-        android:id="@+id/navigation_scrollView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <LinearLayout
-            android:id="@+id/linear_layout_in_scroll_view"
+        <android.support.v4.widget.NestedScrollView
+            android:id="@+id/navigation_scrollView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
 
-        <RelativeLayout
-            android:id="@+id/ingredients_servings_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            <LinearLayout
+                android:id="@+id/linear_layout_in_scroll_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/servings_title_land"
-                android:text="@string/servings_label"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:paddingTop="8dp"
-                android:layout_marginStart="16dp"
-                android:layout_alignParentStart="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                <CheckBox
+                    android:id="@+id/fav_checkBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:drawableEnd="?android:attr/listChoiceIndicatorMultiple"
+                    android:paddingTop="8dp"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/add_fav_recipe"
+                    android:textSize="20sp" />
 
-        </RelativeLayout>
+                <RelativeLayout
+                    android:id="@+id/ingredients_servings_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/servings_title_land"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_marginStart="16dp"
+                        android:paddingTop="8dp"
+                        android:text="@string/servings_label"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                </RelativeLayout>
 
 
-    <TextView
-        android:id="@+id/recipe_ingredients_land"
-        android:paddingTop="16dp"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="16sp" />
+                <TextView
+                    android:id="@+id/recipe_ingredients_land"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
+                    android:paddingTop="16dp"
+                    android:textSize="16sp" />
 
-    <FrameLayout
-        android:id="@+id/master_list_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+                <FrameLayout
+                    android:id="@+id/master_list_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
-        </LinearLayout>
+            </LinearLayout>
 
-    </android.support.v4.widget.NestedScrollView>
+        </android.support.v4.widget.NestedScrollView>
 
     </LinearLayout>
 

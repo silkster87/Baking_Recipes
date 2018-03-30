@@ -39,6 +39,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <CheckBox
+                android:id="@+id/fav_checkBox"
+                android:text="@string/add_fav_recipe"
+                android:textSize="18sp"
+                android:layout_alignBaseline="@+id/servings_title"
+                android:button="@null"
+                android:drawableEnd="?android:attr/listChoiceIndicatorMultiple"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@+id/servings_title"
+                android:paddingTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp" />
+
             <TextView
                 android:id="@+id/servings_title"
                 android:text="@string/servings_label"
