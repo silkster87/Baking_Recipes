@@ -22,8 +22,9 @@ public class RecipeDbHelper extends SQLiteOpenHelper {
         final String SQL_CREATE_RECIPES_TABLE = "CREATE TABLE " + TABLE_NAME + " (" +
                 RecipeContract.RecipeEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 RecipeContract.RecipeEntry.COLUMN_RECIPE_NAME + " TEXT NOT NULL, " +
+                RecipeContract.RecipeEntry.COLUMN_RECIPE_ID + " INTEGER NOT NULL, " +
                 RecipeContract.RecipeEntry.COLUMN_NO_OF_SERVINGS + " INTEGER NOT NULL, " +
-                RecipeContract.RecipeEntry.INGREDIENTS + " TEXT NOT NULL)";
+                RecipeContract.RecipeEntry.COLUMN_INGREDIENTS + " TEXT NOT NULL)";
 
         sqLiteDatabase.execSQL(SQL_CREATE_RECIPES_TABLE);
     }

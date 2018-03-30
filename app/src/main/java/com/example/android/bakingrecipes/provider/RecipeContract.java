@@ -7,6 +7,10 @@ public class RecipeContract {
 
     public static final String AUTHORITY = "com.example.android.bakingrecipes";
 
+    public static final int INVALID_RECIPE_ID = -1;
+
+    public static final String EXTRA_RECIPE_ID = "EXTRA_RECIPE_ID";
+
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 
     public static final String PATH_RECIPES = "Recipes";
@@ -19,7 +23,8 @@ public class RecipeContract {
 
         public static final String TABLE_NAME = "Baking_Recipes";
         public static final String COLUMN_RECIPE_NAME = "Recipe_Name";
+        public static final String COLUMN_RECIPE_ID = "Recipe_ID";
         public static final String COLUMN_NO_OF_SERVINGS = "Servings";
-        public static final String INGREDIENTS = "Ingredients";
+        public static final String COLUMN_INGREDIENTS = "Ingredients";
     }
 }
