@@ -3,4 +3,8 @@
     <string name="previous_label">Previous</string>
     <string name="next_label">Next</string>
     <string name="servings_label">Servings:</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
+    <string name="add_fav_recipe">Add to Widget</string>
+    <string name="no_recipes">No recipes</string>
 </resources>
