@@ -1,10 +1,13 @@
 package com.example.android.bakingrecipes;
 
+import android.appwidget.AppWidgetManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
@@ -24,6 +27,7 @@ import com.example.android.bakingrecipes.UI.InstructionFragment;
 import com.example.android.bakingrecipes.UI.MasterListFragment;
 import com.example.android.bakingrecipes.UI.VideoFragment;
 import com.example.android.bakingrecipes.provider.RecipeContract;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -220,6 +224,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
     private boolean findIfFavRecipe() {
 
+        /*
         try{
             String mSelection = RecipeContract.RecipeEntry.COLUMN_RECIPE_ID + "=?";
             Cursor cursor = getContentResolver().query(RecipeContract.RecipeEntry.CONTENT_URI, null,
@@ -238,6 +243,16 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
             e.printStackTrace();
             return false;
         }
+*/
+
+            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+            String json = sharedPrefs.getString(mRecipe.getRecipeName(), "");
+
+            if(json.equals("")){
+                return false;
+            }else {
+                return true;
+            }
 
     }
 
@@ -291,14 +306,26 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         View view = findViewById(R.id.fav_checkBox);
 
         boolean checked = ((CheckBox) view).isChecked();
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+
 
         if(checked){
             //add recipe to favourite recipes DB - will be shown in widget
+           /*
             addFavRecipe(mRecipe.getRecipeName(), mRecipe.getmID(), mRecipe.getmServings(),
                     mRecipe.getArrayOfIngredients());
+*/
+            SharedPreferences.Editor prefsEditor = sharedPrefs.edit();
+            Gson gson = new Gson();
+            String json = gson.toJson(mRecipe);
+            prefsEditor.putString(mRecipe.getRecipeName(), json);
+            prefsEditor.apply();
+
+            Toast.makeText(getBaseContext(), mRecipe.getRecipeName() + " added to Widgets. ", Toast.LENGTH_LONG).show();
 
         } else {
             //delete recipe from favourite recipes DB - will be removed in widget
+            /*
         int itemsDeleted = getContentResolver().delete(RecipeContract.RecipeEntry.CONTENT_URI, RecipeContract.RecipeEntry.COLUMN_RECIPE_ID+"=?",
                new String[]{Integer.toString(mRecipe.getmID())});
 
@@ -306,10 +333,19 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
             Toast.makeText(getBaseContext(), mRecipe.getRecipeName() + " removed from Widgets.",
                     Toast.LENGTH_LONG).show();
         }
+        */
+
+            SharedPreferences.Editor prefsEditor = sharedPrefs.edit();
+            prefsEditor.remove(mRecipe.getRecipeName());
+            prefsEditor.apply();
+
+            Toast.makeText(getBaseContext(), mRecipe.getRecipeName() + " removed from Widgets.",
+                    Toast.LENGTH_LONG).show();
+
         }
-        RecipeWidgetUpdateService.startActionUpdateRecipeWidgets(this);
     }
 
+    /*
     private void addFavRecipe(String recipeName, int recipeID, int recipeServings, ArrayList<Ingredient> arrayOfIngredients) {
 
         ContentValues cv = new ContentValues();
@@ -328,7 +364,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         }
 
     }
-
+*/
     private String makeIngredientsString(List<Ingredient> mIngredientList){
 
         StringBuilder builder = new StringBuilder();
