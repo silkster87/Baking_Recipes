@@ -1,6 +1,10 @@
 package com.example.android.bakingrecipes;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
@@ -8,18 +12,24 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.example.android.bakingrecipes.RecipeObjects.Ingredient;
 import com.example.android.bakingrecipes.RecipeObjects.Recipe;
 import com.example.android.bakingrecipes.RecipeObjects.Step;
 import com.example.android.bakingrecipes.UI.InstructionFragment;
 import com.example.android.bakingrecipes.UI.MasterListFragment;
 import com.example.android.bakingrecipes.UI.VideoFragment;
+import com.example.android.bakingrecipes.provider.RecipeContract;
 
 import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /*This class will display the selected Recipe from the user in terms of the steps and ingredients
 for the recipe. The user can click on a specific step for more detail. This will then launch a
@@ -31,6 +41,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
     @Nullable @BindView(R.id.recipe_ingredients) TextView mRecipeIngredients;
     @Nullable @BindView(R.id.steps_recyclerView) RecyclerView mStepsRecyclerView;
     @Nullable @BindView(R.id.servings_title) TextView mServingsTextView;
+    @BindView(R.id.fav_checkBox) CheckBox mFavRecipeCheckbox;
 
     //Views in the master detail flow. These are used if in tablet mode landscape
     @Nullable @BindView(R.id.servings_title_land) TextView mServingsLandTextView;
@@ -62,6 +73,14 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         mRecipe = getIntent().getParcelableExtra(MainActivity.recipeBundle);
 
         historyOfSteps = new ArrayList<>();
+
+        boolean isFavRecipe = findIfFavRecipe();
+
+        if(isFavRecipe){
+            mFavRecipeCheckbox.setChecked(true);
+        }else {
+            mFavRecipeCheckbox.setChecked(false);
+        }
 
         if(savedInstanceState!=null){
             stepNumber = savedInstanceState.getInt(STEP_NUMBER);
@@ -118,19 +137,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
             findViewById(R.id.linear_layout_in_scroll_view).requestFocus();
 
             //Setting the LHS of the master detail flow
-            StringBuilder builder = new StringBuilder();
+            String ingredients = makeIngredientsString(mIngredientList);
 
-            for(int i=0; i<mIngredientList.size(); i++){
-
-                builder.append(mIngredientList.get(i).getIngredient())
-                        .append(", ")
-                        .append(mIngredientList.get(i).getmQuantity())
-                        .append(" ")
-                        .append((mIngredientList.get(i).getmMeasure()))
-                        .append("\n");
-            }
-
-            String ingredients = builder.toString();
             mRecipeIngredientsLandTextView.setText(ingredients);
             String mServingsLand = " " + Integer.toString(mRecipe.getmServings());
             mServingsLandTextView.append(mServingsLand);
@@ -210,6 +218,29 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
     }
 
+    private boolean findIfFavRecipe() {
+
+        try{
+            String mSelection = RecipeContract.RecipeEntry.COLUMN_RECIPE_ID + "=?";
+            Cursor cursor = getContentResolver().query(RecipeContract.RecipeEntry.CONTENT_URI, null,
+                    mSelection,
+                    new String[]{Integer.toString(mRecipe.getmID())},
+                    null, null);
+
+            if(cursor != null && cursor.getCount() != 0){
+                cursor.close();
+                return true;
+            }else {
+                return false;
+            }
+        } catch (Exception e){
+            Toast.makeText(getBaseContext(), "Error: Unable to make query", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
     @Override
     public void onStepItemSelected(Step step) {
         //When user clicks on a step, we want the video and instruction fragments to update according
@@ -253,6 +284,66 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
                         .commit();
             }
         }
+    }
+
+    @OnClick(R.id.fav_checkBox)
+    public void addOrRemoveRecipeWidget(){
+        View view = findViewById(R.id.fav_checkBox);
+
+        boolean checked = ((CheckBox) view).isChecked();
+
+        if(checked){
+            //add recipe to favourite recipes DB - will be shown in widget
+            addFavRecipe(mRecipe.getRecipeName(), mRecipe.getmID(), mRecipe.getmServings(),
+                    mRecipe.getArrayOfIngredients());
+
+        } else {
+            //delete recipe from favourite recipes DB - will be removed in widget
+        int itemsDeleted = getContentResolver().delete(RecipeContract.RecipeEntry.CONTENT_URI, RecipeContract.RecipeEntry.COLUMN_RECIPE_ID+"=?",
+               new String[]{Integer.toString(mRecipe.getmID())});
+
+        if(itemsDeleted != 0){
+            Toast.makeText(getBaseContext(), mRecipe.getRecipeName() + " removed from Widgets.",
+                    Toast.LENGTH_LONG).show();
+        }
+        }
+        RecipeWidgetUpdateService.startActionUpdateRecipeWidgets(this);
+    }
+
+    private void addFavRecipe(String recipeName, int recipeID, int recipeServings, ArrayList<Ingredient> arrayOfIngredients) {
+
+        ContentValues cv = new ContentValues();
+
+        cv.put(RecipeContract.RecipeEntry.COLUMN_RECIPE_NAME, recipeName);
+        cv.put(RecipeContract.RecipeEntry.COLUMN_RECIPE_ID, recipeID);
+        cv.put(RecipeContract.RecipeEntry.COLUMN_NO_OF_SERVINGS, recipeServings);
+        cv.put(RecipeContract.RecipeEntry.COLUMN_INGREDIENTS, makeIngredientsString(arrayOfIngredients));
+
+        ContentResolver resolver = getContentResolver();
+
+        Uri insertedUri = resolver.insert(RecipeContract.RecipeEntry.CONTENT_URI, cv);
+
+        if(insertedUri != null){
+            Toast.makeText(getBaseContext(), recipeName + " added to Widgets. ", Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+    private String makeIngredientsString(List<Ingredient> mIngredientList){
+
+        StringBuilder builder = new StringBuilder();
+
+        for(int i=0; i<mIngredientList.size(); i++){
+
+            builder.append(mIngredientList.get(i).getIngredient())
+                    .append(", ")
+                    .append(mIngredientList.get(i).getmQuantity())
+                    .append(" ")
+                    .append((mIngredientList.get(i).getmMeasure()))
+                    .append("\n");
+        }
+
+        return builder.toString();
     }
 
     @Override
