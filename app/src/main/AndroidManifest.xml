@@ -21,11 +21,6 @@
             </intent-filter>
         </activity>
 
-        <provider
-            android:name=".provider.RecipeContentProvider"
-            android:authorities="com.example.android.bakingrecipes"
-            android:exported="false" />
-
         <activity
             android:name=".RecipeDetailActivity"
             android:parentActivityName=".MainActivity">
