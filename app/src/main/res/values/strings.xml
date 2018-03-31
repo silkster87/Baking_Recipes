@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BakingRecipes</string>
+    <string name="app_name">Baking Recipes</string>
     <string name="previous_label">Previous</string>
     <string name="next_label">Next</string>
     <string name="servings_label">Servings:</string>
