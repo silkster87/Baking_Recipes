@@ -1,12 +1,15 @@
 package com.example.android.bakingrecipes;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.android.bakingrecipes.RecipeObjects.Recipe;
@@ -32,12 +35,17 @@ public class RecipeStepActivity extends AppCompatActivity {
 
     private Recipe mRecipe;
     private int stepArrayPosition;
+    private RelativeLayout.LayoutParams paramsNotFullScreen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_step);
         ButterKnife.bind(this);
+
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
+            getSupportActionBar().hide();
+        }
 
         if(findViewById(R.id.video_view) != null) {
             //If we are in portrait mode we can use next and previous buttons
@@ -99,22 +107,16 @@ public class RecipeStepActivity extends AppCompatActivity {
     }
 
 
+
     //The Exomedia library from dev brackets was used - it is essentially a wrapper around ExoPlayer.
     //This simplifies setting up the video since we are only querying off a video URL
-    private void setUpVideo(String videoURL) {
-        mVideoView.setVideoURI(Uri.parse(videoURL));
-        mVideoView.start();
-    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if(mVideoView != null) {
             mVideoView.release();
-        }else {
-            mVideoViewLand.release();
         }
-
 
     }
 
