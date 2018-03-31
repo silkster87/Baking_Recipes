@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -35,17 +37,19 @@ public class RecipeStepActivity extends AppCompatActivity {
 
     private Recipe mRecipe;
     private int stepArrayPosition;
-    private RelativeLayout.LayoutParams paramsNotFullScreen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recipe_step);
-        ButterKnife.bind(this);
-
+        
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
             getSupportActionBar().hide();
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
+
+        setContentView(R.layout.activity_recipe_step);
+        ButterKnife.bind(this);
 
         if(findViewById(R.id.video_view) != null) {
             //If we are in portrait mode we can use next and previous buttons
