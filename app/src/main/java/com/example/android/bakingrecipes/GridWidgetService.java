@@ -29,6 +29,7 @@ public class GridWidgetService extends RemoteViewsService{
 
     private Context mContext;
     private Map<String, ?> mKeys;
+    private ArrayList<Recipe> mRecipeList;
 
     public GridRemoteViewsFactory(Context applicationContext) {
         mContext=applicationContext;
@@ -44,6 +45,21 @@ public class GridWidgetService extends RemoteViewsService{
         //Get all favourited recipes from shared preferences
          SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext.getApplicationContext());
          mKeys = sharedPrefs.getAll();
+
+         makeListOfRecipes();
+     }
+
+     private void makeListOfRecipes() {
+
+        mRecipeList = new ArrayList<>();
+
+         for(Map.Entry<String, ?> entry : mKeys.entrySet()) {
+             String json = entry.getValue().toString();
+             Gson gson = new Gson();
+             Recipe mRecipe = gson.fromJson(json, Recipe.class);
+
+             mRecipeList.add(mRecipe);
+         }
      }
 
      @Override
@@ -61,10 +77,7 @@ public class GridWidgetService extends RemoteViewsService{
 
          RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.recipe_widget_provider);
 
-         for(Map.Entry<String, ?> entry : mKeys.entrySet()){
-            String json = entry.getValue().toString();
-            Gson gson = new Gson();
-            Recipe mRecipe = gson.fromJson(json, Recipe.class);
+            Recipe mRecipe = mRecipeList.get(position);
 
             String recipeName = mRecipe.getRecipeName();
             int noOfServings = mRecipe.getmServings();
@@ -97,7 +110,7 @@ public class GridWidgetService extends RemoteViewsService{
             fillInIntent.putExtras(extras);
             views.setOnClickFillInIntent(R.id.recipe_widget, fillInIntent);
 
-        }
+
         return views;
      }
 
