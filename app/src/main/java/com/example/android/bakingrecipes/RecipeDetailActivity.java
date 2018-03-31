@@ -1,6 +1,7 @@
 package com.example.android.bakingrecipes;
 
 import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -26,7 +27,6 @@ import com.example.android.bakingrecipes.RecipeObjects.Step;
 import com.example.android.bakingrecipes.UI.InstructionFragment;
 import com.example.android.bakingrecipes.UI.MasterListFragment;
 import com.example.android.bakingrecipes.UI.VideoFragment;
-import com.example.android.bakingrecipes.provider.RecipeContract;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -224,27 +224,6 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
     private boolean findIfFavRecipe() {
 
-        /*
-        try{
-            String mSelection = RecipeContract.RecipeEntry.COLUMN_RECIPE_ID + "=?";
-            Cursor cursor = getContentResolver().query(RecipeContract.RecipeEntry.CONTENT_URI, null,
-                    mSelection,
-                    new String[]{Integer.toString(mRecipe.getmID())},
-                    null, null);
-
-            if(cursor != null && cursor.getCount() != 0){
-                cursor.close();
-                return true;
-            }else {
-                return false;
-            }
-        } catch (Exception e){
-            Toast.makeText(getBaseContext(), "Error: Unable to make query", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-            return false;
-        }
-*/
-
             SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
             String json = sharedPrefs.getString(mRecipe.getRecipeName(), "");
 
@@ -310,30 +289,17 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
 
         if(checked){
-            //add recipe to favourite recipes DB - will be shown in widget
-           /*
-            addFavRecipe(mRecipe.getRecipeName(), mRecipe.getmID(), mRecipe.getmServings(),
-                    mRecipe.getArrayOfIngredients());
-*/
+
             SharedPreferences.Editor prefsEditor = sharedPrefs.edit();
             Gson gson = new Gson();
             String json = gson.toJson(mRecipe);
             prefsEditor.putString(mRecipe.getRecipeName(), json);
             prefsEditor.apply();
 
+
             Toast.makeText(getBaseContext(), mRecipe.getRecipeName() + " added to Widgets. ", Toast.LENGTH_LONG).show();
 
         } else {
-            //delete recipe from favourite recipes DB - will be removed in widget
-            /*
-        int itemsDeleted = getContentResolver().delete(RecipeContract.RecipeEntry.CONTENT_URI, RecipeContract.RecipeEntry.COLUMN_RECIPE_ID+"=?",
-               new String[]{Integer.toString(mRecipe.getmID())});
-
-        if(itemsDeleted != 0){
-            Toast.makeText(getBaseContext(), mRecipe.getRecipeName() + " removed from Widgets.",
-                    Toast.LENGTH_LONG).show();
-        }
-        */
 
             SharedPreferences.Editor prefsEditor = sharedPrefs.edit();
             prefsEditor.remove(mRecipe.getRecipeName());
@@ -343,28 +309,16 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
                     Toast.LENGTH_LONG).show();
 
         }
+        //Update the appWidgets
+        Intent intent = new Intent(this, RecipeWidgetProvider.class);
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        int[] ids = AppWidgetManager.getInstance(getApplication())
+                .getAppWidgetIds(new ComponentName(getApplication(), RecipeWidgetProvider.class));
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        sendBroadcast(intent);
     }
 
-    /*
-    private void addFavRecipe(String recipeName, int recipeID, int recipeServings, ArrayList<Ingredient> arrayOfIngredients) {
 
-        ContentValues cv = new ContentValues();
-
-        cv.put(RecipeContract.RecipeEntry.COLUMN_RECIPE_NAME, recipeName);
-        cv.put(RecipeContract.RecipeEntry.COLUMN_RECIPE_ID, recipeID);
-        cv.put(RecipeContract.RecipeEntry.COLUMN_NO_OF_SERVINGS, recipeServings);
-        cv.put(RecipeContract.RecipeEntry.COLUMN_INGREDIENTS, makeIngredientsString(arrayOfIngredients));
-
-        ContentResolver resolver = getContentResolver();
-
-        Uri insertedUri = resolver.insert(RecipeContract.RecipeEntry.CONTENT_URI, cv);
-
-        if(insertedUri != null){
-            Toast.makeText(getBaseContext(), recipeName + " added to Widgets. ", Toast.LENGTH_LONG).show();
-        }
-
-    }
-*/
     private String makeIngredientsString(List<Ingredient> mIngredientList){
 
         StringBuilder builder = new StringBuilder();
