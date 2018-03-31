@@ -5,11 +5,9 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
+
 import android.support.annotation.Nullable;
 
-import com.example.android.bakingrecipes.provider.RecipeContract;
 
 public class RecipeWidgetUpdateService extends IntentService{
 
@@ -37,39 +35,12 @@ public class RecipeWidgetUpdateService extends IntentService{
     }
 
     public void handleActionUpdateRecipeWidgets() {
-        Uri RECIPE_URI = RecipeContract.RecipeEntry.CONTENT_URI;
-        Cursor cursor = getContentResolver().query(
-                RECIPE_URI,
-                null,
-                null,
-                null,
-                null
-        );
 
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this, RecipeWidgetProvider.class));
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_grid_view);
 
-        if(cursor != null && cursor.getCount() > 0 ){
-            cursor.moveToFirst();
-
-            for(int i = 0; i < appWidgetIds.length; i++) {
-                while (cursor.moveToNext()) {
-                    int recipeNameIndex = cursor.getColumnIndex(RecipeContract.RecipeEntry.COLUMN_RECIPE_NAME);
-                    int recipeIDIndex = cursor.getColumnIndex(RecipeContract.RecipeEntry.COLUMN_RECIPE_ID);
-                    int noOfServingsIndex = cursor.getColumnIndex(RecipeContract.RecipeEntry.COLUMN_NO_OF_SERVINGS);
-                    int ingredientsIndex = cursor.getColumnIndex(RecipeContract.RecipeEntry.COLUMN_INGREDIENTS);
-
-                    String recipeName = cursor.getString(recipeNameIndex);
-                    int recipeID = cursor.getInt(recipeIDIndex);
-                    int noOfServings = cursor.getInt(noOfServingsIndex);
-                    String ingredients = cursor.getString(ingredientsIndex);
-
-                    RecipeWidgetProvider.updateAppWidget(getBaseContext(), appWidgetManager, appWidgetIds[i], recipeID, recipeName, noOfServings, ingredients);
-                }
-            }
-            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_grid_view);
-            cursor.close();
-        }
+        RecipeWidgetProvider.updateRecipeWidgets(this, appWidgetManager, appWidgetIds);
 
     }
 }
