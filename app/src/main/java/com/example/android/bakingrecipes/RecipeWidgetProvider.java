@@ -10,7 +10,12 @@ import android.widget.RemoteViews;
 
 
 /**
- * Implementation of App Widget functionality.
+ * Implementation of App Widget functionality. SharedPreferences were used to help with the data
+ * interaction between recipes and widgets. We don't need to pass any data here as they will be updated
+ * in the GridWidgetService RemoteViewsFactory by getting the default SharedPreferences.
+ *
+ * In this provider the main purpose is to just set the remote views using the GridWidgetService.
+ *
  */
 public class RecipeWidgetProvider extends AppWidgetProvider {
 

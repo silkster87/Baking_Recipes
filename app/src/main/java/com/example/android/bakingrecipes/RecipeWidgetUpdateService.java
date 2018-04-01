@@ -8,6 +8,10 @@ import android.content.Intent;
 
 import android.support.annotation.Nullable;
 
+/*
+* This is a service that the RecipeWidgetProvider will call on its onUpdate() method.
+* When it handles the intent it will update the widgets.
+* */
 
 public class RecipeWidgetUpdateService extends IntentService{
 

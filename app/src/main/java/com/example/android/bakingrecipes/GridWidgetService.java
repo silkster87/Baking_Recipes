@@ -3,8 +3,6 @@ package com.example.android.bakingrecipes;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.widget.RemoteViews;
@@ -17,6 +15,10 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Map;
 
+/*
+* In this GridWidgetService we will get an instance of a GridRemoteViewsFactory. SharedPreferences
+* are used in updating the Widget data.
+* */
 public class GridWidgetService extends RemoteViewsService{
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
