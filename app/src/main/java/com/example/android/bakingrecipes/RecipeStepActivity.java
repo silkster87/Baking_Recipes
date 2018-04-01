@@ -34,6 +34,7 @@ public class RecipeStepActivity extends AppCompatActivity {
     @Nullable @BindView(R.id.next_button) Button mNextButton;
     @Nullable @BindView(R.id.video_view) com.devbrackets.android.exomedia.ui.widget.VideoView  mVideoView;
     @Nullable @BindView(R.id.video_view_land) com.devbrackets.android.exomedia.ui.widget.VideoView mVideoViewLand;
+    @Nullable @BindView(R.id.instructions_land) TextView mStepInstrLand;
 
     private Recipe mRecipe;
     private int stepArrayPosition;
@@ -41,7 +42,7 @@ public class RecipeStepActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
             getSupportActionBar().hide();
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -94,17 +95,22 @@ public class RecipeStepActivity extends AppCompatActivity {
             String recipeTitle = getIntent().getStringExtra(RecipeDetailActivity.recipeTitle);
             String videoURL = mStep.getmVideoURL();
             String thumbNailURL = mStep.getmThumbNailURL();
+            String instructions = mStep.getmDescription();
             setTitle(recipeTitle);
 
             //Sometimes the thumbnail URL has a video but if we don't have any videos we can hide it
             if(!videoURL.equals("")) {
+                mStepInstrLand.setVisibility(View.GONE);
                 mVideoViewLand.setVideoURI(Uri.parse(videoURL));
                 mVideoViewLand.start();
             } else if (!thumbNailURL.equals("")){
+                mStepInstrLand.setVisibility(View.GONE);
                 mVideoViewLand.setVideoURI(Uri.parse(thumbNailURL));
                 mVideoViewLand.start();
-            }else {
+            }else { //There is no video to show so set instructions instead.
                 mVideoViewLand.setVisibility(View.GONE);
+                mStepInstrLand.setVisibility(View.VISIBLE);
+                mStepInstrLand.setText(instructions);
             }
 
         }
