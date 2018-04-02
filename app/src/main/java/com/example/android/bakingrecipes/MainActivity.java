@@ -2,6 +2,8 @@ package com.example.android.bakingrecipes;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -10,6 +12,8 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+
+import com.example.android.bakingrecipes.IdlingResource.SimpleIdlingResource;
 import com.example.android.bakingrecipes.RecipeObjects.Ingredient;
 import com.example.android.bakingrecipes.RecipeObjects.Recipe;
 import com.example.android.bakingrecipes.RecipeObjects.Step;
@@ -36,6 +40,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     public static final String recipeBundle = "recipeDetails";
 
+    @Nullable
+    private SimpleIdlingResource mIdlingResource;
+
+
+    @VisibleForTesting
+    public SimpleIdlingResource returnIdlingResource() {
+        if(mIdlingResource == null){
+            return new SimpleIdlingResource();
+        } else return mIdlingResource;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         setTitle("Udacity's Baking App");
 
-    //Need to set the recycler view depending on whether it is phone or tablet
+        //Need to set the recycler view depending on whether it is phone or tablet
         if(findViewById(R.id.recipe_recyclerView) != null) {
 
             mRecipeRecyclerView = findViewById(R.id.recipe_recyclerView);
@@ -75,7 +89,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         LoaderManager.LoaderCallbacks<ArrayList<Recipe>> callback = MainActivity.this;
         getSupportLoaderManager().initLoader(0, null,  callback);
 
+        //For testing purposes
+        if(mIdlingResource!=null)mIdlingResource.setIdleState(false);
     }
+
     @SuppressLint("StaticFieldLeak")
     @Override
     public Loader<ArrayList<Recipe>> onCreateLoader(int i, final Bundle args) {
@@ -172,10 +189,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public void onLoadFinished(Loader<ArrayList<Recipe>> loader, ArrayList<Recipe> recipes) {
         mRecipesAdapter.setRecipeData(recipes);
+        if(mIdlingResource!=null)mIdlingResource.setIdleState(true);
+
     }
 
     @Override
     public void onLoaderReset(Loader<ArrayList<Recipe>> loader) {
 
     }
+
 }
