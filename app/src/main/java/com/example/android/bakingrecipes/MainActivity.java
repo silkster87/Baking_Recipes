@@ -18,7 +18,6 @@ import com.example.android.bakingrecipes.RecipeObjects.Ingredient;
 import com.example.android.bakingrecipes.RecipeObjects.Recipe;
 import com.example.android.bakingrecipes.RecipeObjects.Step;
 import com.example.android.bakingrecipes.Utilities.GetOkHttpResponse;
-import com.example.android.bakingrecipes.Utilities.NetworkUtils;
 import com.example.android.bakingrecipes.Utilities.OpenRecipeJSONUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -42,7 +41,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Nullable
     private SimpleIdlingResource mIdlingResource;
-
 
     @VisibleForTesting
     public SimpleIdlingResource returnIdlingResource() {
@@ -107,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             public ArrayList<Recipe> loadInBackground() {
 
                 try{
-                    GetOkHttpResponse getOkHttpResponse = new GetOkHttpResponse(NetworkUtils.BAKING_RECIPES_URL);
+                    GetOkHttpResponse getOkHttpResponse = new GetOkHttpResponse(GetOkHttpResponse.BAKING_RECIPES_URL);
                     String jsonRecipeDataResponse = getOkHttpResponse.run();
                     JSONArray jsonArrayRecipeResult = OpenRecipeJSONUtils.getJSONArrayOfRecipeResults(jsonRecipeDataResponse);
 

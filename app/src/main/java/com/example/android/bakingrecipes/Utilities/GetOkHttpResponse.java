@@ -16,6 +16,9 @@ public class GetOkHttpResponse {
 
     private OkHttpClient client = new OkHttpClient();
 
+    public final static String BAKING_RECIPES_URL =
+            "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
+
     public GetOkHttpResponse(String url){
         this.url = url;
     }

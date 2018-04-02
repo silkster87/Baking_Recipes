@@ -2,15 +2,10 @@ package com.example.android.bakingrecipes;
 
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -43,13 +38,13 @@ recipe step activity.
 
 public class RecipeDetailActivity extends AppCompatActivity implements MasterListFragment.OnStepItemSelectedListener{
 
-    @Nullable @BindView(R.id.recipe_ingredients) TextView mRecipeIngredients;
-    @Nullable @BindView(R.id.steps_recyclerView) RecyclerView mStepsRecyclerView;
-    @Nullable @BindView(R.id.servings_title) TextView mServingsTextView;
-    @BindView(R.id.fav_checkBox) CheckBox mFavRecipeCheckbox;
+    @Nullable @BindView(R.id.recipe_ingredients)  TextView mRecipeIngredients;
+    @Nullable @BindView(R.id.steps_recyclerView)  RecyclerView mStepsRecyclerView;
+    @Nullable @BindView(R.id.servings_title)  TextView mServingsTextView;
+    @BindView(R.id.fav_checkBox)  CheckBox mFavRecipeCheckbox;
 
     //Views in the master detail flow. These are used if in tablet mode landscape
-    @Nullable @BindView(R.id.servings_title_land) TextView mServingsLandTextView;
+    @Nullable @BindView(R.id.servings_title_land)  TextView mServingsLandTextView;
     @Nullable @BindView(R.id.recipe_ingredients_land) TextView mRecipeIngredientsLandTextView;
 
     private Recipe mRecipe;
@@ -58,7 +53,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
     public static final String recipeTitle = "recipeTitle";
     public static final String positionStepClicked = "positionStepClicked";
     private int stepNumber;
-    public static final String STEP_NUMBER = "STEP_NUMBER";
+    private static final String STEP_NUMBER = "STEP_NUMBER";
     private InstructionFragment instructionFragment;
     private VideoFragment videoFragment;
     private ArrayList<Integer> historyOfSteps;
@@ -228,11 +223,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
             SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
             String json = sharedPrefs.getString(mRecipe.getRecipeName(), "");
 
-            if(json.equals("")){
-                return false;
-            }else {
-                return true;
-            }
+        return !json.equals("");
 
     }
 
@@ -357,5 +348,5 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
             getFragmentManager().popBackStack();
         }
     }
-    
+
 }

@@ -6,7 +6,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.TextView;
 
 import com.example.android.bakingrecipes.RecipeObjects.Recipe;
@@ -40,9 +39,8 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
         boolean shouldAttachToParentImmediately = false;
 
         View view = inflater.inflate(layoutIdForListItem, parent, shouldAttachToParentImmediately);
-        RecipesAdapter.ViewHolder viewHolder = new RecipesAdapter.ViewHolder(view);
 
-        return viewHolder;
+        return new RecipesAdapter.ViewHolder(view);
     }
 
     @Override

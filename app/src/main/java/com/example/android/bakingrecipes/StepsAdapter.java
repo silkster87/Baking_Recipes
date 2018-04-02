@@ -37,9 +37,8 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.ViewHolder> 
         LayoutInflater inflater = LayoutInflater.from(context);
 
         View view = inflater.inflate(layoutIdForListItem, parent, false);
-        StepsAdapter.ViewHolder viewHolder = new StepsAdapter.ViewHolder(view);
 
-        return viewHolder;
+        return new StepsAdapter.ViewHolder(view);
     }
 
     @Override
