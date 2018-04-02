@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -356,5 +357,5 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
             getFragmentManager().popBackStack();
         }
     }
-
+    
 }
