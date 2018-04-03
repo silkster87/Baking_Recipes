@@ -8,4 +8,5 @@
     <string name="add_fav_recipe">Add to Widget</string>
     <string name="no_recipes">No recipes</string>
     <string name="cup_cake">Cup Cake</string>
+    <string name="recipe_thumbnail">Recipe Thumbnail</string>
 </resources>
