@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -75,10 +76,10 @@ public class RecipeStepActivity extends AppCompatActivity {
             String thumbNailURL = mStep.getmThumbNailURL();
 
             //Sometimes the thumbnail URL has a video but if we don't have any videos we can hide it
-            if(!videoURL.equals("")) {
+            if(!TextUtils.isEmpty(videoURL)) {
                 mVideoView.setVideoURI(Uri.parse(videoURL));
                 mVideoView.start();
-            } else if (!thumbNailURL.equals("")){
+            } else if (!TextUtils.isEmpty(thumbNailURL)){
                 mVideoView.setVideoURI(Uri.parse(thumbNailURL));
                 mVideoView.start();
             }else {
@@ -96,11 +97,11 @@ public class RecipeStepActivity extends AppCompatActivity {
             setTitle(recipeTitle);
 
             //Sometimes the thumbnail URL has a video but if we don't have any videos we can hide it
-            if(!videoURL.equals("")) {
+            if(!TextUtils.isEmpty(videoURL)) {
                 mStepInstrLand.setVisibility(View.GONE);
                 mVideoViewLand.setVideoURI(Uri.parse(videoURL));
                 mVideoViewLand.start();
-            } else if (!thumbNailURL.equals("")){
+            } else if (!TextUtils.isEmpty(thumbNailURL)){
                 mStepInstrLand.setVisibility(View.GONE);
                 mVideoViewLand.setVideoURI(Uri.parse(thumbNailURL));
                 mVideoViewLand.start();
