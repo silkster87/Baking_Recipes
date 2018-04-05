@@ -1,6 +1,5 @@
 package com.example.android.bakingrecipes.UI;
 
-import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,6 +20,7 @@ import com.google.android.exoplayer2.trackselection.AdaptiveVideoTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -39,8 +39,8 @@ public class VideoFragment extends Fragment {
     private String videoURL;
     private SimpleExoPlayerView videoView;
     private SimpleExoPlayer player;
+    private Long videoPosition;
     public static final String VIDEO_URL = "video_url";
-    private static final String VIDEO_POSITION = "video_position";
 
 
     public VideoFragment(){}
@@ -50,11 +50,9 @@ public class VideoFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.video_fragment_layout, container, false);
-        long currentPosition = 0;
 
         if(savedInstanceState != null){
             videoURL = savedInstanceState.getString(VIDEO_URL);
-            currentPosition = savedInstanceState.getLong(VIDEO_POSITION);
         }
         videoView = rootView.findViewById(R.id.video_view_fragment);
 
@@ -74,13 +72,17 @@ public class VideoFragment extends Fragment {
         MediaSource videoSource = new ExtractorMediaSource(Uri.parse(videoURL),
                 dataSourceFactory, new DefaultExtractorsFactory(), null, null);
 
-        player.prepare(videoSource);
         videoView.requestFocus();
 
-        if(currentPosition != 0){
-            player.seekTo(currentPosition);
+        if(videoPosition!=null){
+            player.prepare(videoSource, false, true);
+            player.setPlayWhenReady(true);
+            player.seekTo(videoPosition);
+        } else{
+            player.prepare(videoSource);
+            player.setPlayWhenReady(true);
         }
-        player.setPlayWhenReady(true);
+        videoView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT);
         return rootView;
     }
 
@@ -116,8 +118,13 @@ public class VideoFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle currentState) {
         currentState.putString(VIDEO_URL, videoURL);
-        long videoCurrentPosition = player.getCurrentPosition();
+    }
 
-        currentState.putLong(VIDEO_POSITION, videoCurrentPosition);
+    public long getCurrentPosition() {
+         return player.getCurrentPosition();
+    }
+
+    public void setPosition(Long currentVideoPosition) {
+        this.videoPosition = currentVideoPosition;
     }
 }

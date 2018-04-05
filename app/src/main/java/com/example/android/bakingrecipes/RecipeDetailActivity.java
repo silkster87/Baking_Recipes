@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -49,6 +50,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
     private Recipe mRecipe;
 
+    private static final String VIDEO_POSITION = "Video_Position";
     public static final String recipeStep = "recipeStep";
     public static final String recipeTitle = "recipeTitle";
     public static final String positionStepClicked = "positionStepClicked";
@@ -58,7 +60,9 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
     private VideoFragment videoFragment;
     private ArrayList<Integer> historyOfSteps;
     private static final String HISTORY_OF_STEPS = "HISTORY_OF_STEPS";
+    private final String VIDEO_FRAG_TAG = "video_fragment_tag";
     private MasterListFragment stepFragment;
+    @Nullable private Long currentVideoPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +89,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         if(savedInstanceState!=null){
             stepNumber = savedInstanceState.getInt(STEP_NUMBER);
             historyOfSteps = savedInstanceState.getIntegerArrayList(HISTORY_OF_STEPS);
+            currentVideoPosition = savedInstanceState.getLong(VIDEO_POSITION);
         }
 
         setTitle(mRecipe.getRecipeName());
@@ -164,35 +169,30 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
                 //If we are going into recipe detail activity for first time set it to first step
 
                 String videoURL = mRecipe.getArrayOfSteps().get(0).getmVideoURL();
-                String thumbNailURL = mRecipe.getArrayOfSteps().get(0).getmThumbNailURL();
                 String instructionForStep = mRecipe.getArrayOfSteps().get(0).getmDescription();
                 stepNumber = 0;
                 historyOfSteps.add(stepNumber);
 
                 instructionFragment.setInstructionText(instructionForStep);
 
-                //sometimes there is no videoURL or thumbnailURL
-                if (thumbNailURL.equals("")) {
+                if (!TextUtils.isEmpty(videoURL)) {
                     videoFragment.setUpVideo(videoURL);
-                } else if(videoURL.equals("")){
-                    videoFragment.setUpVideo(thumbNailURL);
                 }
                 FragmentManager fragmentManager1 = getSupportFragmentManager();
                 fragmentManager1.beginTransaction()
-                        .add(R.id.video_land_frag, videoFragment)
+                        .add(R.id.video_land_frag, videoFragment, VIDEO_FRAG_TAG)
                         .add(R.id.instruction_frag, instructionFragment)
                         .commit();
             } else{
                 //SavedInstance state is not null and we need to replace existing fragments.
                 //If screen is rotated it will use this else block.
-
+                videoFragment = (VideoFragment) fragmentManager.findFragmentByTag(VIDEO_FRAG_TAG);
                 String videoURL = mRecipe.getArrayOfSteps().get(stepNumber).getmVideoURL();
-                String thumbnailURL = mRecipe.getArrayOfSteps().get(stepNumber).getmThumbNailURL();
                 String instructionForStep = mRecipe.getArrayOfSteps().get(stepNumber).getmDescription();
                 historyOfSteps.add(stepNumber);
                 instructionFragment.setInstructionText(instructionForStep);
 
-                if(thumbnailURL.equals("") && videoURL.equals("")){
+                if(TextUtils.isEmpty(videoURL)){
                     //There is no video content to show
                         FragmentManager fragmentManagerNoURL = getSupportFragmentManager();
                         fragmentManagerNoURL.beginTransaction()
@@ -201,11 +201,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
                                 .addToBackStack(null)
                                 .commit();
                 }else { //setting up the video URL
-                    if (thumbnailURL.equals("")) {
-                        videoFragment.setUpVideo(videoURL);
-                    } else if (videoURL.equals("")) {
-                        videoFragment.setUpVideo(thumbnailURL);
-                    }
+                    videoFragment.setUpVideo(videoURL);
+                    videoFragment.setPosition(currentVideoPosition);
                     FragmentManager fragManager = getSupportFragmentManager();
                     fragManager.beginTransaction()
                             .replace(R.id.video_land_frag, videoFragment)
@@ -219,12 +216,9 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
     }
 
     private boolean findIfFavRecipe() {
-
             SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
             String json = sharedPrefs.getString(mRecipe.getRecipeName(), "");
-
         return !json.equals("");
-
     }
 
     @Override
@@ -241,13 +235,12 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
             
             stepNumber = newStepNumber;
             String videoURL = step.getmVideoURL();
-            String thumbnailURL = step.getmThumbNailURL();
             String instructionOfStep = step.getmDescription();
 
             instructionFragment = new InstructionFragment();
             instructionFragment.setInstructionText(instructionOfStep);
 
-            if (thumbnailURL.equals("") && videoURL.equals("")) {
+            if (TextUtils.isEmpty(videoURL)) {
                 //There is no video content to show
                 FragmentManager fragmentManagerNoURL = getSupportFragmentManager();
                 fragmentManagerNoURL.beginTransaction()
@@ -257,11 +250,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
                         .commit();
             } else {
                 videoFragment = new VideoFragment();
-                if (thumbnailURL.equals("")) {
-                    videoFragment.setUpVideo(videoURL);
-                } else if (videoURL.equals("")) {
-                    videoFragment.setUpVideo(thumbnailURL);
-                }
+                videoFragment.setUpVideo(videoURL);
                 FragmentManager fragManagerWithURL = getSupportFragmentManager();
                 fragManagerWithURL.beginTransaction()
                         .replace(R.id.video_land_frag, videoFragment)
@@ -333,6 +322,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         super.onSaveInstanceState(outState);
         outState.putInt(STEP_NUMBER, stepNumber);
         outState.putIntegerArrayList(HISTORY_OF_STEPS, historyOfSteps);
+        long currentPosition = videoFragment.getCurrentPosition();
+        outState.putLong(VIDEO_POSITION, currentPosition);
     }
 
 
