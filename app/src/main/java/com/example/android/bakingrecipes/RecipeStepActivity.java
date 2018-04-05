@@ -3,8 +3,6 @@ package com.example.android.bakingrecipes;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -76,7 +74,9 @@ public class RecipeStepActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recipe_step);
         ButterKnife.bind(this);
 
-        if(savedInstanceState!=null) videoPosition = savedInstanceState.getLong(VIDEO_POSITION);
+        if(savedInstanceState!=null) {
+            videoPosition = savedInstanceState.getLong(VIDEO_POSITION);
+        }
 
         if(getResources().getBoolean(R.bool.portraitMode)) {
             //If we are in portrait mode we can use next and previous buttons
@@ -147,14 +147,16 @@ public class RecipeStepActivity extends AppCompatActivity {
         MediaSource videoSource = new ExtractorMediaSource(Uri.parse(videoURL),
                 dataSourceFactory, extractorsFactory, null, null);
 
-
-        player.prepare(videoSource);
         playerView.requestFocus();
 
         if(videoPosition !=null){
+            player.prepare(videoSource, false, true);
+            player.setPlayWhenReady(true);
             player.seekTo(videoPosition);
+        } else {
+            player.prepare(videoSource);
+            player.setPlayWhenReady(true);
         }
-        player.setPlayWhenReady(true);
     }
 
     @Override
@@ -212,8 +214,8 @@ public class RecipeStepActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         long currentPosition = player.getCurrentPosition();
         outState.putLong(VIDEO_POSITION, currentPosition);
     }
