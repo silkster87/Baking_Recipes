@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.v4.widget.NestedScrollView
-    android:id="@+id/recipe_step_detail_view"
+<android.support.v4.widget.NestedScrollView android:id="@+id/recipe_step_detail_view"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:orientation="vertical"
     android:fillViewport="false"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
 <LinearLayout
@@ -17,20 +16,12 @@
     android:orientation="vertical"
    >
 
-    <!--
-    <com.devbrackets.android.exomedia.ui.widget.VideoView
-        android:id="@+id/video_view"
-        android:layout_width="match_parent"
-        android:layout_height="320dp"
-        app:useDefaultControls="true"
-        android:layout_marginTop="0dp"
-        />
--->
     <com.google.android.exoplayer2.ui.SimpleExoPlayerView
         android:id="@+id/player_view"
         android:focusable="true"
         android:layout_width="match_parent"
-        android:layout_height="320dp"/>
+        android:layout_height="320dp"
+        app:resize_mode="fit"/>
 
 
     <TextView
