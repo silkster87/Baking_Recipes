@@ -60,8 +60,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
     private VideoFragment videoFragment;
     private ArrayList<Integer> historyOfSteps;
     private static final String HISTORY_OF_STEPS = "HISTORY_OF_STEPS";
-    private final String VIDEO_FRAG_TAG = "video_fragment_tag";
     private MasterListFragment stepFragment;
+    private FragmentManager fragmentManager;
     @Nullable private Long currentVideoPosition;
 
     @Override
@@ -69,6 +69,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_detail);
         ButterKnife.bind(this);
+
+        fragmentManager = getSupportFragmentManager();
 
         ActionBar ab = getSupportActionBar();
 
@@ -90,13 +92,15 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
             stepNumber = savedInstanceState.getInt(STEP_NUMBER);
             historyOfSteps = savedInstanceState.getIntegerArrayList(HISTORY_OF_STEPS);
             currentVideoPosition = savedInstanceState.getLong(VIDEO_POSITION);
+        }else{
+            stepNumber = 0;
         }
 
         setTitle(mRecipe.getRecipeName());
 
         List<Ingredient> mIngredientList = mRecipe.getArrayOfIngredients();
 
-        if(findViewById(R.id.master_list_container) == null){
+        if(!getResources().getBoolean(R.bool.isTablet)){
             //Not in 2 pane mode - in phone view
 
         mStepsRecyclerView.setHasFixedSize(true);
@@ -150,10 +154,9 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
             List<Step> listOfSteps = mRecipe.getArrayOfSteps();
             stepFragment = new MasterListFragment();
-           // stepFragment.setStepToBeHighlighted(stepNumber);
             stepFragment.setListOfSteps(listOfSteps);
+           // stepFragment.setStepToBeHighlighted(0);
 
-            FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
                     .add(R.id.master_list_container, stepFragment)
                     .commit();
@@ -163,56 +166,44 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
             //instruction and video fragments.
 
             instructionFragment = new InstructionFragment();
+
+            if(savedInstanceState==null){
             videoFragment = new VideoFragment();
+            } else {
+                videoFragment = (VideoFragment) fragmentManager.findFragmentById(R.id.video_land_frag);
+            }
 
-            if(savedInstanceState == null) {
-                //If we are going into recipe detail activity for first time set it to first step
+                    String videoURL = mRecipe.getArrayOfSteps().get(stepNumber).getmVideoURL();
+                    String instructionForStep = mRecipe.getArrayOfSteps().get(stepNumber).getmDescription();
+                    historyOfSteps.add(stepNumber);
+                    instructionFragment.setInstructionText(instructionForStep);
 
-                String videoURL = mRecipe.getArrayOfSteps().get(0).getmVideoURL();
-                String instructionForStep = mRecipe.getArrayOfSteps().get(0).getmDescription();
-                stepNumber = 0;
-                historyOfSteps.add(stepNumber);
-
-                instructionFragment.setInstructionText(instructionForStep);
-
-                if (!TextUtils.isEmpty(videoURL)) {
-                    videoFragment.setUpVideo(videoURL);
-                }
-                FragmentManager fragmentManager1 = getSupportFragmentManager();
-                fragmentManager1.beginTransaction()
-                        .add(R.id.video_land_frag, videoFragment, VIDEO_FRAG_TAG)
-                        .add(R.id.instruction_frag, instructionFragment)
-                        .commit();
-            } else{
-                //SavedInstance state is not null and we need to replace existing fragments.
-                //If screen is rotated it will use this else block.
-                videoFragment = (VideoFragment) fragmentManager.findFragmentByTag(VIDEO_FRAG_TAG);
-                String videoURL = mRecipe.getArrayOfSteps().get(stepNumber).getmVideoURL();
-                String instructionForStep = mRecipe.getArrayOfSteps().get(stepNumber).getmDescription();
-                historyOfSteps.add(stepNumber);
-                instructionFragment.setInstructionText(instructionForStep);
-
-                if(TextUtils.isEmpty(videoURL)){
-                    //There is no video content to show
-                        FragmentManager fragmentManagerNoURL = getSupportFragmentManager();
-                        fragmentManagerNoURL.beginTransaction()
+                    if (TextUtils.isEmpty(videoURL)) {
+                        //There is no video content to show
+                        fragmentManager.beginTransaction()
                                 .replace(R.id.instruction_frag, instructionFragment)
                                 .remove(videoFragment)
                                 .addToBackStack(null)
                                 .commit();
-                }else { //setting up the video URL
-                    videoFragment.setUpVideo(videoURL);
-                    videoFragment.setPosition(currentVideoPosition);
-                    FragmentManager fragManager = getSupportFragmentManager();
-                    fragManager.beginTransaction()
-                            .replace(R.id.video_land_frag, videoFragment)
-                            .replace(R.id.instruction_frag, instructionFragment)
-                            .addToBackStack(null)
-                            .commit();
-                }
-            }
-        }
+                    } else { //setting up the video URL
+                        if(savedInstanceState!=null){ videoFragment.setPosition(currentVideoPosition);}
+                        videoFragment.setUpVideo(videoURL);
 
+                        if(R.id.video_land_frag != 0) {
+                            fragmentManager.beginTransaction()
+                                    .replace(R.id.video_land_frag, videoFragment)
+                                    .replace(R.id.instruction_frag, instructionFragment)
+                                    .addToBackStack(null)
+                                    .commit();
+                        } else {
+                            fragmentManager.beginTransaction()
+                                    .add(R.id.video_land_frag, videoFragment)
+                                    .replace(R.id.instruction_frag, instructionFragment)
+                                    .addToBackStack(null)
+                                    .commit();
+                        }
+                    }
+        }
     }
 
     private boolean findIfFavRecipe() {
@@ -242,8 +233,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
             if (TextUtils.isEmpty(videoURL)) {
                 //There is no video content to show
-                FragmentManager fragmentManagerNoURL = getSupportFragmentManager();
-                fragmentManagerNoURL.beginTransaction()
+                fragmentManager.beginTransaction()
                         .remove(videoFragment)
                         .replace(R.id.instruction_frag, instructionFragment)
                         .addToBackStack(null)
@@ -251,8 +241,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
             } else {
                 videoFragment = new VideoFragment();
                 videoFragment.setUpVideo(videoURL);
-                FragmentManager fragManagerWithURL = getSupportFragmentManager();
-                fragManagerWithURL.beginTransaction()
+
+                fragmentManager.beginTransaction()
                         .replace(R.id.video_land_frag, videoFragment)
                         .replace(R.id.instruction_frag, instructionFragment)
                         .addToBackStack(null)
@@ -260,6 +250,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
             }
         }
     }
+
 
     @OnClick(R.id.fav_checkBox)
     public void addOrRemoveRecipeWidget(){
@@ -322,8 +313,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         super.onSaveInstanceState(outState);
         outState.putInt(STEP_NUMBER, stepNumber);
         outState.putIntegerArrayList(HISTORY_OF_STEPS, historyOfSteps);
-        long currentPosition = videoFragment.getCurrentPosition();
-        outState.putLong(VIDEO_POSITION, currentPosition);
+        if(videoFragment!=null) {long currentPosition = videoFragment.getCurrentPosition();
+        outState.putLong(VIDEO_POSITION, currentPosition); }
     }
 
 

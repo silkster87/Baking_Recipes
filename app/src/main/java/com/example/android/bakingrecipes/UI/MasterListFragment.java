@@ -38,7 +38,6 @@ public class MasterListFragment extends Fragment {
 
     public void setStepToBeHighlighted(int stepNumber) {
         mAdapter.setStepToHighlight(stepNumber);
-        notifyAll();
     }
 
     public interface OnStepItemSelectedListener {

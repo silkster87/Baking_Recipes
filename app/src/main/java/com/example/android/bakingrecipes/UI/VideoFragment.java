@@ -51,39 +51,48 @@ public class VideoFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.video_fragment_layout, container, false);
 
+
         if(savedInstanceState != null){
+            if(savedInstanceState.containsKey(VIDEO_URL))
             videoURL = savedInstanceState.getString(VIDEO_URL);
         }
+
         videoView = rootView.findViewById(R.id.video_view_fragment);
 
         //Set up ExoPlayer
-        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-        TrackSelection.Factory videoTrackSelectionFactory =
-                new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
-        TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+        initializePlayer();
 
-        LoadControl loadControl = new DefaultLoadControl();
-        player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, loadControl);
-        videoView.setPlayer(player);
-        videoView.setKeepScreenOn(true);
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getContext(),
-                Util.getUserAgent(getContext(), "Baking Recipe Step"));
-
-        MediaSource videoSource = new ExtractorMediaSource(Uri.parse(videoURL),
-                dataSourceFactory, new DefaultExtractorsFactory(), null, null);
-
-        videoView.requestFocus();
-
-        if(videoPosition!=null){
-            player.prepare(videoSource, false, true);
-            player.setPlayWhenReady(true);
-            player.seekTo(videoPosition);
-        } else{
-            player.prepare(videoSource);
-            player.setPlayWhenReady(true);
-        }
-        videoView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT);
         return rootView;
+    }
+
+    private void initializePlayer() {
+
+        if(player == null) {
+            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+            TrackSelection.Factory videoTrackSelectionFactory =
+                    new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
+            TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+
+            LoadControl loadControl = new DefaultLoadControl();
+            player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, loadControl);
+            videoView.setPlayer(player);
+            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getContext(),
+                    Util.getUserAgent(getContext(), "Baking Recipe Step"));
+
+            MediaSource videoSource = new ExtractorMediaSource(Uri.parse(videoURL),
+                    dataSourceFactory, new DefaultExtractorsFactory(), null, null);
+
+            videoView.requestFocus();
+            if (videoPosition != null) {
+                player.prepare(videoSource, false, true);
+                player.setPlayWhenReady(true);
+                player.seekTo(videoPosition);
+            } else {
+                player.prepare(videoSource);
+                player.setPlayWhenReady(true);
+            }
+            videoView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT);
+        }
     }
 
     public void setUpVideo(String videoURL){
@@ -94,7 +103,9 @@ public class VideoFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
          if(player!=null){
+             player.stop();
              player.release();
+             player=null;
          }
 
     }
@@ -115,10 +126,12 @@ public class VideoFragment extends Fragment {
        }
     }
 
+
     @Override
     public void onSaveInstanceState(Bundle currentState) {
         currentState.putString(VIDEO_URL, videoURL);
     }
+
 
     public long getCurrentPosition() {
          return player.getCurrentPosition();
