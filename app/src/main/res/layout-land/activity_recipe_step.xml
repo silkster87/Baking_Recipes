@@ -10,6 +10,7 @@
     <!--When the user rotates their phone in landscape mode, we want the video to be in
      fullscreen mode-->
 
+    <!--
     <com.devbrackets.android.exomedia.ui.widget.VideoView
         android:id="@+id/video_view_land"
         android:layout_width="fill_parent"
@@ -20,6 +21,12 @@
         android:layout_alignParentBottom="true"
         app:useDefaultControls="true"
         />
+-->
+    <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+        android:id="@+id/player_view_land"
+        android:focusable="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <TextView
         android:id="@+id/instructions_land"

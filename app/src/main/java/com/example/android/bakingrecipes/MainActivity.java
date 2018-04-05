@@ -19,6 +19,8 @@ import com.example.android.bakingrecipes.RecipeObjects.Recipe;
 import com.example.android.bakingrecipes.RecipeObjects.Step;
 import com.example.android.bakingrecipes.Utilities.GetOkHttpResponse;
 import com.example.android.bakingrecipes.Utilities.OpenRecipeJSONUtils;
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.ArrayList;
@@ -114,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
                     //We want to loop through the array list of recipes.
 
+
                     for(int i=0; i<jsonArrayRecipeResult.length(); i++){
 
                         JSONObject recipeJSONObject = jsonArrayRecipeResult.getJSONObject(i);
@@ -168,6 +171,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                     }
 
                     return arrayOfRecipes;
+
 
                 } catch (Exception e){
                     e.printStackTrace();
