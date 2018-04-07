@@ -141,9 +141,4 @@ public class VideoFragment extends Fragment {
         return player.getCurrentPosition();
     }
 
-
-    public void setPosition(Long currentVideoPosition) {
-        this.videoPosition = currentVideoPosition;
-    }
-
 }
