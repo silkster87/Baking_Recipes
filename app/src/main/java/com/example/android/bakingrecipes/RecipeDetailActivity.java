@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,7 +27,6 @@ import com.example.android.bakingrecipes.UI.MasterListFragment;
 import com.example.android.bakingrecipes.UI.VideoFragment;
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -50,7 +50,6 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
     private Recipe mRecipe;
 
-    private static final String VIDEO_POSITION = "Video_Position";
     public static final String recipeStep = "recipeStep";
     public static final String recipeTitle = "recipeTitle";
     public static final String positionStepClicked = "positionStepClicked";
@@ -58,11 +57,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
     private static final String STEP_NUMBER = "STEP_NUMBER";
     private InstructionFragment instructionFragment;
     private VideoFragment videoFragment;
-    private ArrayList<Integer> historyOfSteps;
-    private static final String HISTORY_OF_STEPS = "HISTORY_OF_STEPS";
     private MasterListFragment stepFragment;
     private FragmentManager fragmentManager;
-    @Nullable private Long currentVideoPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,9 +73,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         if(ab!=null) ab.setDisplayHomeAsUpEnabled(true);
 
         mRecipe = getIntent().getParcelableExtra(MainActivity.recipeBundle);
-
-        historyOfSteps = new ArrayList<>();
-
+        
         boolean isFavRecipe = findIfFavRecipe();
 
         if(isFavRecipe){
@@ -91,12 +85,6 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         if(savedInstanceState!=null){
             if(savedInstanceState.containsKey(STEP_NUMBER)){
                 stepNumber = savedInstanceState.getInt(STEP_NUMBER);
-            }
-            if(savedInstanceState.containsKey(HISTORY_OF_STEPS)){
-                historyOfSteps = savedInstanceState.getIntegerArrayList(HISTORY_OF_STEPS);
-            }
-            if(savedInstanceState.containsKey(VIDEO_POSITION)){
-                currentVideoPosition = savedInstanceState.getLong(VIDEO_POSITION);
             }
         }else{
             stepNumber = 0;
@@ -175,7 +163,6 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
             String videoURL = mRecipe.getArrayOfSteps().get(stepNumber).getmVideoURL();
             String instructionForStep = mRecipe.getArrayOfSteps().get(stepNumber).getmDescription();
-            historyOfSteps.add(stepNumber);
             instructionFragment.setInstructionText(instructionForStep);
 
             if(savedInstanceState==null){
@@ -192,9 +179,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
                                 .addToBackStack(null)
                                 .commit();
                     } else { //setting up the video URL
-                        if(savedInstanceState!=null){
-                                videoFragment.setPosition(currentVideoPosition);
-                        }
+
                         videoFragment.setUpVideo(videoURL);
 
                         if(R.id.video_land_frag != 0) {
@@ -229,9 +214,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
         //If user clicks on an step that is already showing then it is unnecessary to make changes
         if(newStepNumber != stepNumber) {
-            
-            historyOfSteps.add(newStepNumber);
-            
+
             stepNumber = newStepNumber;
             String videoURL = step.getmVideoURL();
             String instructionOfStep = step.getmDescription();
@@ -308,14 +291,10 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(STEP_NUMBER, stepNumber);
-        outState.putIntegerArrayList(HISTORY_OF_STEPS, historyOfSteps);
-
-        if(videoFragment!=null) {
-            long currentPosition = videoFragment.getCurrentPosition();
-            outState.putLong(VIDEO_POSITION, currentPosition);
-        }
-
     }
 
-
+    @Override
+    public void onBackPressed() {
+        NavUtils.navigateUpFromSameTask(this);
+    }
 }

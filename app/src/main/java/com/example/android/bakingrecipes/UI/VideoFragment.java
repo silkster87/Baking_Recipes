@@ -133,7 +133,7 @@ public class VideoFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle currentState) {
         currentState.putString(VIDEO_URL, videoURL);
-        currentState.putLong(POSITION, getCurrentPosition());
+        if(player!=null) currentState.putLong(POSITION, getCurrentPosition());
     }
 
 
