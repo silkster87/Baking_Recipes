@@ -39,7 +39,8 @@
                 android:id="@+id/recipe_item_thumbNail"
                 android:layout_alignParentEnd="true"
                 android:layout_width="50dp"
-                android:layout_height="50dp" />
+                android:layout_height="50dp"
+                android:contentDescription="@string/recipe_thumbnail" />
 
         </RelativeLayout>
 

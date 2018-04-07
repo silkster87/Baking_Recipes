@@ -22,6 +22,7 @@
 
         <ImageView
             android:id="@+id/step_item_thumbNail"
+            android:contentDescription="@string/step_item_thumbNail"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginEnd="8dp"

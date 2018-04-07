@@ -9,4 +9,5 @@
     <string name="no_recipes">No recipes</string>
     <string name="cup_cake">Cup Cake</string>
     <string name="recipe_thumbnail">Recipe Thumbnail</string>
+    <string name="step_item_thumbNail">Step Item Thumbnail</string>
 </resources>
