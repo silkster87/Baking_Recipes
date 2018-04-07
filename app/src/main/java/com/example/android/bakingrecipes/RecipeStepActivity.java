@@ -3,6 +3,7 @@ package com.example.android.bakingrecipes;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,17 +16,22 @@ import android.widget.TextView;
 import com.example.android.bakingrecipes.RecipeObjects.Recipe;
 import com.example.android.bakingrecipes.RecipeObjects.Step;
 import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
 
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.AdaptiveVideoTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
@@ -46,7 +52,7 @@ if it has one, a full description of the step and buttons to navigate to the pre
 step.
  */
 
-public class RecipeStepActivity extends AppCompatActivity {
+public class RecipeStepActivity extends AppCompatActivity implements ExoPlayer.EventListener {
 
     @Nullable @BindView(R.id.recipe_step_instructions) TextView mStepInstructions;
     @Nullable @BindView(R.id.previous_button) Button mPreviousButton;
@@ -59,6 +65,9 @@ public class RecipeStepActivity extends AppCompatActivity {
     private int stepArrayPosition;
     private SimpleExoPlayer player;
     private String VIDEO_POSITION = "Video_Position";
+    private String PLAY_STATE = "Play_State";
+    private String videoURL;
+    private Boolean getPlayWhenReady = true;
 
     @Nullable private Long videoPosition;
 
@@ -76,7 +85,10 @@ public class RecipeStepActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         if(savedInstanceState!=null) {
+            if(savedInstanceState.containsKey(VIDEO_POSITION))
             videoPosition = savedInstanceState.getLong(VIDEO_POSITION);
+            if(savedInstanceState.containsKey(PLAY_STATE))
+                getPlayWhenReady = savedInstanceState.getBoolean(PLAY_STATE);
         }
 
         if(getResources().getBoolean(R.bool.portraitMode)) {
@@ -98,7 +110,7 @@ public class RecipeStepActivity extends AppCompatActivity {
             Step mStep = getIntent().getParcelableExtra(RecipeDetailActivity.recipeStep);
             String recipeTitle = getIntent().getStringExtra(RecipeDetailActivity.recipeTitle);
             setTitle(recipeTitle);
-            String videoURL = mStep.getmVideoURL();
+            videoURL = mStep.getmVideoURL();
 
             if(!TextUtils.isEmpty(videoURL)) {
                 setUpExoPlayerVideo(videoURL, playerView);
@@ -112,7 +124,6 @@ public class RecipeStepActivity extends AppCompatActivity {
             Step mStep = getIntent().getParcelableExtra(RecipeDetailActivity.recipeStep);
             String recipeTitle = getIntent().getStringExtra(RecipeDetailActivity.recipeTitle);
             String videoURL = mStep.getmVideoURL();
-           // String thumbNailURL = mStep.getmThumbNailURL();
             String instructions = mStep.getmDescription();
             setTitle(recipeTitle);
 
@@ -150,13 +161,15 @@ public class RecipeStepActivity extends AppCompatActivity {
 
         playerView.requestFocus();
 
+        player.addListener(this);
+
         if(videoPosition !=null){
             player.prepare(videoSource, false, true);
-            player.setPlayWhenReady(true);
+            player.setPlayWhenReady(getPlayWhenReady);
             player.seekTo(videoPosition);
         } else {
             player.prepare(videoSource);
-            player.setPlayWhenReady(true);
+            player.setPlayWhenReady(getPlayWhenReady);
         }
         //Fill the player view fully but maintain aspect ratio
         playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT);
@@ -166,26 +179,33 @@ public class RecipeStepActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         if(player != null){
-            player.setPlayWhenReady(false);
+            videoPosition = player.getCurrentPosition();
+            player.stop();
+            player.release();
+            player=null;
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if(player != null){
-            player.setPlayWhenReady(true);
+        if(player == null && playerView !=null) {
+            setUpExoPlayerVideo(videoURL, playerView);
+            player.setPlayWhenReady(getPlayWhenReady);
+            if(videoPosition!=null) {
+                player.seekTo(videoPosition);
+            }
         }
     }
-
-    //The Exomedia library from dev brackets was used - it is essentially a wrapper around ExoPlayer.
-    //This simplifies setting up the video since we are only querying off a video URL
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if(player != null){
+            videoPosition = player.getCurrentPosition();
+            player.stop();
             player.release();
+            player=null;
         }
 
     }
@@ -194,7 +214,6 @@ public class RecipeStepActivity extends AppCompatActivity {
     public void nextButton(){
         stepArrayPosition += 1;
             startNewStepActivity(stepArrayPosition);
-
     }
 
     @Optional @OnClick(R.id.previous_button)
@@ -219,7 +238,29 @@ public class RecipeStepActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        long currentPosition = player.getCurrentPosition();
-        outState.putLong(VIDEO_POSITION, currentPosition);
+        if(videoPosition!=null) outState.putLong(VIDEO_POSITION, videoPosition);
+        outState.putBoolean(PLAY_STATE, getPlayWhenReady);
     }
+
+    @Override
+    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+        getPlayWhenReady = playWhenReady; //The player state will change when user clicks play/pause
+    }
+
+    @Override
+    public void onTimelineChanged(Timeline timeline, Object manifest) {}
+
+    @Override
+    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {}
+
+    @Override
+    public void onLoadingChanged(boolean isLoading) {}
+
+    @Override
+    public void onPlayerError(ExoPlaybackException error) {}
+
+    @Override
+    public void onPositionDiscontinuity() {}
+
+
 }
