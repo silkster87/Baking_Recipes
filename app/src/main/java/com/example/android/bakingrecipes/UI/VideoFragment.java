@@ -41,6 +41,7 @@ public class VideoFragment extends Fragment {
     private SimpleExoPlayer player;
     private Long videoPosition;
     public static final String VIDEO_URL = "video_url";
+    private static final String POSITION = "position";
 
 
     public VideoFragment(){}
@@ -55,6 +56,8 @@ public class VideoFragment extends Fragment {
         if(savedInstanceState != null){
             if(savedInstanceState.containsKey(VIDEO_URL))
             videoURL = savedInstanceState.getString(VIDEO_URL);
+            if(savedInstanceState.containsKey(POSITION))
+                videoPosition = savedInstanceState.getLong(POSITION);
         }
 
         videoView = rootView.findViewById(R.id.video_view_fragment);
@@ -130,14 +133,17 @@ public class VideoFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle currentState) {
         currentState.putString(VIDEO_URL, videoURL);
+        currentState.putLong(POSITION, getCurrentPosition());
     }
 
 
     public long getCurrentPosition() {
-         return player.getCurrentPosition();
+        return player.getCurrentPosition();
     }
+
 
     public void setPosition(Long currentVideoPosition) {
         this.videoPosition = currentVideoPosition;
     }
+
 }

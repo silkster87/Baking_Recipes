@@ -4,14 +4,17 @@ import android.content.Context;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.android.bakingrecipes.R;
 import com.example.android.bakingrecipes.RecipeObjects.Step;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -28,6 +31,7 @@ public class MasterListAdapter extends RecyclerView.Adapter<MasterListAdapter.Vi
     private final OnItemClickListener listener;
     private List<Step> listOfSteps;
     private int row_index = 0;
+    private String TAG = MasterListAdapter.class.getSimpleName();
 
     public MasterListAdapter(List<Step> listOfSteps, OnItemClickListener listener){
         this.listOfSteps=listOfSteps;
@@ -47,6 +51,15 @@ public class MasterListAdapter extends RecyclerView.Adapter<MasterListAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull final MasterListAdapter.ViewHolder holder, final int position) {
         holder.bind(listOfSteps.get(position), listener, position);
+
+        String recipeStepThumbNail = listOfSteps.get(position).getmThumbNailURL();
+        Context context = holder.mRecipeItemTextView.getContext();
+        try{
+            Picasso.with(context).load(recipeStepThumbNail).into(holder.mStepThumbNail);
+        } catch (Exception e){
+            e.printStackTrace();
+            Log.e(TAG, "Unable to load Recipe Step image of " + listOfSteps.get(position).getmShortDesc());
+        }
         if(position!=0) {
             String recipeStep = Integer.toString(listOfSteps.get(position).getmID()) + ". " + listOfSteps.get(position).getmShortDesc();
             holder.mRecipeItemTextView.setText(recipeStep);
@@ -75,11 +88,13 @@ public class MasterListAdapter extends RecyclerView.Adapter<MasterListAdapter.Vi
 
         public final TextView mRecipeItemTextView;
         public final LinearLayout mLinearLayout;
+        public final ImageView mStepThumbNail;
 
         public ViewHolder(View itemView) {
             super(itemView);
             mLinearLayout = itemView.findViewById(R.id.list_item_linear_layout);
             mRecipeItemTextView = itemView.findViewById(R.id.recipe_item);
+            mStepThumbNail = itemView.findViewById(R.id.step_item_thumbNail);
         }
 
         public void bind(final Step step, final OnItemClickListener listener, final int position) {

@@ -89,9 +89,15 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         }
 
         if(savedInstanceState!=null){
-            stepNumber = savedInstanceState.getInt(STEP_NUMBER);
-            historyOfSteps = savedInstanceState.getIntegerArrayList(HISTORY_OF_STEPS);
-            currentVideoPosition = savedInstanceState.getLong(VIDEO_POSITION);
+            if(savedInstanceState.containsKey(STEP_NUMBER)){
+                stepNumber = savedInstanceState.getInt(STEP_NUMBER);
+            }
+            if(savedInstanceState.containsKey(HISTORY_OF_STEPS)){
+                historyOfSteps = savedInstanceState.getIntegerArrayList(HISTORY_OF_STEPS);
+            }
+            if(savedInstanceState.containsKey(VIDEO_POSITION)){
+                currentVideoPosition = savedInstanceState.getLong(VIDEO_POSITION);
+            }
         }else{
             stepNumber = 0;
         }
@@ -155,7 +161,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
             List<Step> listOfSteps = mRecipe.getArrayOfSteps();
             stepFragment = new MasterListFragment();
             stepFragment.setListOfSteps(listOfSteps);
-           // stepFragment.setStepToBeHighlighted(0);
+
 
             fragmentManager.beginTransaction()
                     .add(R.id.master_list_container, stepFragment)
@@ -167,16 +173,16 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
 
             instructionFragment = new InstructionFragment();
 
+            String videoURL = mRecipe.getArrayOfSteps().get(stepNumber).getmVideoURL();
+            String instructionForStep = mRecipe.getArrayOfSteps().get(stepNumber).getmDescription();
+            historyOfSteps.add(stepNumber);
+            instructionFragment.setInstructionText(instructionForStep);
+
             if(savedInstanceState==null){
-            videoFragment = new VideoFragment();
+                videoFragment = new VideoFragment();
             } else {
                 videoFragment = (VideoFragment) fragmentManager.findFragmentById(R.id.video_land_frag);
             }
-
-                    String videoURL = mRecipe.getArrayOfSteps().get(stepNumber).getmVideoURL();
-                    String instructionForStep = mRecipe.getArrayOfSteps().get(stepNumber).getmDescription();
-                    historyOfSteps.add(stepNumber);
-                    instructionFragment.setInstructionText(instructionForStep);
 
                     if (TextUtils.isEmpty(videoURL)) {
                         //There is no video content to show
@@ -186,7 +192,9 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
                                 .addToBackStack(null)
                                 .commit();
                     } else { //setting up the video URL
-                        if(savedInstanceState!=null){ videoFragment.setPosition(currentVideoPosition);}
+                        if(savedInstanceState!=null){
+                                videoFragment.setPosition(currentVideoPosition);
+                        }
                         videoFragment.setUpVideo(videoURL);
 
                         if(R.id.video_land_frag != 0) {
@@ -238,6 +246,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
                         .replace(R.id.instruction_frag, instructionFragment)
                         .addToBackStack(null)
                         .commit();
+                videoFragment = null;
             } else {
                 videoFragment = new VideoFragment();
                 videoFragment.setUpVideo(videoURL);
@@ -255,31 +264,22 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
     @OnClick(R.id.fav_checkBox)
     public void addOrRemoveRecipeWidget(){
         View view = findViewById(R.id.fav_checkBox);
-
         boolean checked = ((CheckBox) view).isChecked();
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 
-
         if(checked){
-
             SharedPreferences.Editor prefsEditor = sharedPrefs.edit();
             Gson gson = new Gson();
             String json = gson.toJson(mRecipe);
             prefsEditor.putString(mRecipe.getRecipeName(), json);
             prefsEditor.apply();
-
-
             Toast.makeText(getBaseContext(), mRecipe.getRecipeName() + " added to Widgets. ", Toast.LENGTH_LONG).show();
-
         } else {
-
             SharedPreferences.Editor prefsEditor = sharedPrefs.edit();
             prefsEditor.remove(mRecipe.getRecipeName());
             prefsEditor.apply();
-
             Toast.makeText(getBaseContext(), mRecipe.getRecipeName() + " removed from Widgets.",
                     Toast.LENGTH_LONG).show();
-
         }
         //Update the appWidgets
         Intent intent = new Intent(this, RecipeWidgetProvider.class);
@@ -290,13 +290,10 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         sendBroadcast(intent);
     }
 
-
     private String makeIngredientsString(List<Ingredient> mIngredientList){
 
         StringBuilder builder = new StringBuilder();
-
         for(int i=0; i<mIngredientList.size(); i++){
-
             builder.append(mIngredientList.get(i).getIngredient())
                     .append(", ")
                     .append(mIngredientList.get(i).getmQuantity())
@@ -304,7 +301,6 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
                     .append((mIngredientList.get(i).getmMeasure()))
                     .append("\n");
         }
-
         return builder.toString();
     }
 
@@ -313,22 +309,13 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         super.onSaveInstanceState(outState);
         outState.putInt(STEP_NUMBER, stepNumber);
         outState.putIntegerArrayList(HISTORY_OF_STEPS, historyOfSteps);
-        if(videoFragment!=null) {long currentPosition = videoFragment.getCurrentPosition();
-        outState.putLong(VIDEO_POSITION, currentPosition); }
-    }
 
-
-    @Override
-    public void onBackPressed() {
-        int count = getFragmentManager().getBackStackEntryCount();
-        if(count==0){
-            super.onBackPressed();
-        } else {
-            historyOfSteps.remove(historyOfSteps.size()-1);
-            stepNumber = historyOfSteps.get(historyOfSteps.size()-1);
-            stepFragment.setStepToBeHighlighted(stepNumber);
-            getFragmentManager().popBackStack();
+        if(videoFragment!=null) {
+            long currentPosition = videoFragment.getCurrentPosition();
+            outState.putLong(VIDEO_POSITION, currentPosition);
         }
+
     }
+
 
 }
