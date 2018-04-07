@@ -73,7 +73,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
         if(ab!=null) ab.setDisplayHomeAsUpEnabled(true);
 
         mRecipe = getIntent().getParcelableExtra(MainActivity.recipeBundle);
-        
+
         boolean isFavRecipe = findIfFavRecipe();
 
         if(isFavRecipe){
@@ -149,6 +149,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements MasterLis
             List<Step> listOfSteps = mRecipe.getArrayOfSteps();
             stepFragment = new MasterListFragment();
             stepFragment.setListOfSteps(listOfSteps);
+            stepFragment.setStepToBeHighlighted(stepNumber);
 
 
             fragmentManager.beginTransaction()

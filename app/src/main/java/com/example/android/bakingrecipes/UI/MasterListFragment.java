@@ -26,6 +26,7 @@ public class MasterListFragment extends Fragment {
     OnStepItemSelectedListener mCallback;
     private List<Step> listOfSteps;
     private MasterListAdapter mAdapter;
+    private int stepToHighlight;
 
 
     public MasterListFragment(){
@@ -37,7 +38,7 @@ public class MasterListFragment extends Fragment {
     }
 
     public void setStepToBeHighlighted(int stepNumber) {
-        mAdapter.setStepToHighlight(stepNumber);
+        this.stepToHighlight=stepNumber;
     }
 
     public interface OnStepItemSelectedListener {
@@ -75,6 +76,7 @@ public class MasterListFragment extends Fragment {
                 mCallback.onStepItemSelected(step);
             }
         });
+        mAdapter.setStepToHighlight(stepToHighlight);
 
         mRecyclerView.setAdapter(mAdapter);
         return rootView;
